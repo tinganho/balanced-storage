@@ -82,7 +82,7 @@ class SuperView{
 }
 ```
 
-Just adding the expression `this.subView.removeUser()`. Will turn the toogle off. Now, on the same scope we have a matching `on` and `off` toogles. So the compiler will compile the following code.
+Just adding the call expression `this.subView.removeUser()` below. Will turn the toogle off. Now, on the same scope we have a matching `on` and `off` toogles. So the compiler will compile the following code.
 ```typescript
 import { UserChangeTitle } from '/model'
 
