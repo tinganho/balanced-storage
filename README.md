@@ -33,8 +33,8 @@ Then in some other class's method we instantiate the view with a reference user 
 class SuperView{
     someMethod() {
         let view = new View(this.user);
-        view = null; // this.user presists
-        // a memory leak, `view` cannot be garbage collected.
+        view = null; // this.user persists.
+        // A memory leak, `view` cannot be garbage collected.
     }
 }
 ```
@@ -50,6 +50,8 @@ this.user.on('change:title', () => {
 We want to prevent the memory leak by static code analysis. I propose the following syntax
 
 ```typescript
+export toggle UserChangelTitle;
+
 class View<M> {
     constructor(private user: User) {
         on UserChangeTitle
@@ -63,7 +65,9 @@ class View<M> {
 The above code won't compile, since there is no `off` statement. Just adding this line will let the compiler compile:
 ```typescript
     public remove() {
+        off UserChangeTitle
         this.user.off('change:title', )
     }
 }
 ```
+Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile.
