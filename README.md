@@ -73,10 +73,10 @@ Whenever you toogle on something you must toogle it off. Otherwise the compiler 
 
 The above code won't compile, since there is no `off` declaration. Just adding this line will let the compiler compile:
 ```typescript
-import {UserChangeTitle} from '/model'
+import { UserChangeTitle } from '/model'
 
 class SuperView{
-    someMethod() {
+    showSubView() {
         this.subView = new View(this.user); // Turns the toggle on.
         this.subView.removeUser(); // Turns the toggle off.
         this.subView = null;
