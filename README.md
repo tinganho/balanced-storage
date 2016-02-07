@@ -69,7 +69,7 @@ class View<M> {
     }
 }
 ```
-Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. A toogle is spreading upwards also if you there is no off statement:
+Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. A toogle is spreading upwards, if there is no local off statement matching one on statement:
 
 The above code won't compile, since there is no `off` declaration. Just adding this line will let the compiler compile:
 ```typescript
@@ -77,8 +77,8 @@ import {UserChangeTitle} from '/model'
 
 class SuperView{
     someMethod() {
-        this.subView = new View(this.user);
-        this.subView.user = null;
+        this.subView = new View(this.user); // Turns the toggle on.
+        this.subView.removeUser(); // Turns the toggle off.
         this.subView = null;
     }
 }
