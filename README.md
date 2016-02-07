@@ -76,4 +76,16 @@ class SuperView{
     }
 }
 ```
-Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile.
+Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. A toogle is spreading upwards also if you there is no off statement:
+```typescript
+import {UserChangeTitle} from '/model'
+
+class SuperView{
+    on UserChangeTitle
+    someMethod() {
+        this.subView = new View(this.user);
+        this.subView = null;
+    }
+}
+```
+Since there is no off statement on the above code we must set an on statement to our method.
