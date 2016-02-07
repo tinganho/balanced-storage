@@ -82,7 +82,7 @@ class SuperView{
 }
 ```
 
-Just adding the expression `this.subView.removeUser()`. Will turn the toogle on.
+Just adding the expression `this.subView.removeUser()`. Will turn the toogle off.
 ```typescript
 import { UserChangeTitle } from '/model'
 
