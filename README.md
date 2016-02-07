@@ -28,10 +28,44 @@ class View<M> {
 }
 ```
 
-Then in some other class we instantiate the view with a reference user model:
+Then in some other class's method we instantiate the view with a reference user model:
 ```typescript
-let view = new View(this.user);
-view = null; // this.user presists
-// a memory leak, `view` cannot be garbage collected.
+class SuperView{
+    someMethod() {
+        let view = new View(this.user);
+        view = null; // this.user presists
+        // a memory leak, `view` cannot be garbage collected.
+    }
+}
 ```
+Did you spot what was causing the memory leak? It is on this line:
+```typescript
+this.user.on('change:title', () => {
+    this.showAlert(); // `this` is the reference to view. So `user` is still referencing the `view`.
+});
+```
+
+### Proposal
+
+We want to prevent the memory leak by static code analysis. I propose the following syntax
+
+```typescript
+class View<M> {
+    constructor(private user: User) {
+        on UserChangeTitle
+        off {
+            this.user.off('change:title', this.showAlert),
+            this.user = void;
+        }
+        this.user.on('change:title', this.showAlert);
+    }
+    
+    public showAlert(title: string) {
+        alert(title);
+    }
+    
+    public remove() {
+        this.user.off('change:title', )
+    }
+}
 ```
