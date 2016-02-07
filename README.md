@@ -41,7 +41,7 @@ class SuperView{
 Did you spot what was causing the memory leak? It is on this line:
 ```typescript
 this.user.on('change:title', () => {
-    this.showAlert(); // `this` is the reference to view. So `user` is still referencing the `view`.
+    this.showAlert(); // `this` is referencing view. So `user` is referencing `view`.
 });
 ```
 
