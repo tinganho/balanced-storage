@@ -53,17 +53,15 @@ We want to prevent the memory leak by static code analysis. I propose the follow
 class View<M> {
     constructor(private user: User) {
         on UserChangeTitle
-        off {
-            this.user.off('change:title', this.showAlert),
-            this.user = void;
-        }
         this.user.on('change:title', this.showAlert);
     }
     
     public showAlert(title: string) {
         alert(title);
     }
-    
+```
+The above code won't compile, since there is no `off` statement. Just adding this line will let the compiler compile:
+```typescript
     public remove() {
         this.user.off('change:title', )
     }
