@@ -64,7 +64,7 @@ class View<M> {
     }
 }
 ```
-The above code won't compile, since there is no `off` statement. Just adding this line will let the compiler compile:
+The above code won't compile, since there is no `off` declaration. Just adding this line will let the compiler compile:
 ```typescript
 import {UserChangeTitle} from '/model'
 
