@@ -1,6 +1,6 @@
 # toggle-modifier-proposal
 
-And we extend it with a following class to create a user model:
+We extend an EventEmitter class to create a user model:
 
 ```typescript
 class User extends EventEmitter {
@@ -12,10 +12,10 @@ class User extends EventEmitter {
     }
 }
 ```
-What we have done is that 
+We also define the following view class:
 
 ```typescript
-class View<M> extends EventEmitter {
+class View<M> {
     constructor(private user: User) {
         this.user.on('change:title', () => {
             this.showAlert();
@@ -26,7 +26,12 @@ class View<M> extends EventEmitter {
         alert(title);
     }
 }
+```
 
-let view = new View(user);
-view = null;
+Then in some other class we instantiate the view with a reference user model:
+```typescript
+let view = new View(this.user);
+view = null; // this.user presists
+// a memory leak, `view` cannot be garbage collected.
+```
 ```
