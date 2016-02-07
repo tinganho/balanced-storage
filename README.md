@@ -69,9 +69,20 @@ class View<M> {
     }
 }
 ```
-Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. A toogle is spreading upwards, if there is no local off statement matching one on statement:
+Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. In our previous example. Our code would not compile because we only toogle `UserChangeTitle` on. But we never toggle it off.
 
-The above code won't compile, since there is no `off` declaration. Just adding this line will let the compiler compile:
+```typescript
+import { UserChangeTitle } from '/model'
+
+class SuperView{
+    showSubView() {
+        this.subView = new View(this.user); // Turns the toggle on.
+        this.subView = null;
+    }
+}
+```
+
+Just adding the expression `this.subView.removeUser()`. Will turn the toogle on.
 ```typescript
 import { UserChangeTitle } from '/model'
 
