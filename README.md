@@ -69,7 +69,7 @@ class View<M> {
     }
 }
 ```
-Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. In our previous example. Our code would not compile because we only toogle `UserChangeTitle` `on`. But we never toggle it `off`.
+Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. In our previous example, our code would not compile because we only toogle `UserChangeTitle` `on`. But we never toggle it `off`.
 
 ```typescript
 import { UserChangeTitle } from '/model'
