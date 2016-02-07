@@ -59,11 +59,18 @@ class View<M> {
         this.user.on('change:title', this.showAlert);
     }
     
+    off UserChangeTitle
+    public removeUser() {
+        this.user = null;
+    }
+    
     public showAlert(title: string) {
         alert(title);
     }
 }
 ```
+Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. A toogle is spreading upwards also if you there is no off statement:
+
 The above code won't compile, since there is no `off` declaration. Just adding this line will let the compiler compile:
 ```typescript
 import {UserChangeTitle} from '/model'
@@ -76,23 +83,3 @@ class SuperView{
     }
 }
 ```
-Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. A toogle is spreading upwards also if you there is no off statement:
-```typescript
-class View<M> {
-
-    on UserChangeTitle
-    constructor(private user: User) {
-        this.user.on('change:title', this.showAlert);
-    }
-    
-    off UserChangeTitle
-    public removeUser() {
-        this.user = null;
-    }
-    
-    public showAlert(title: string) {
-        alert(title);
-    }
-}
-```
-Since there is no off statement on the above code we must set an on statement to our method.
