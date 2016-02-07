@@ -31,9 +31,9 @@ class View<M> {
 Then in some other class's method we instantiate the view with a reference user model:
 ```typescript
 class SuperView{
-    someMethod() {
-        let view = new View(this.user);
-        view = null; // this.user persists.
+    showSubView() {
+        this.subView = new View(this.user);
+        this.subView = null; // this.user persists.
         // A memory leak, `view` cannot be garbage collected.
     }
 }
@@ -53,8 +53,9 @@ We want to prevent the memory leak by static code analysis. I propose the follow
 export toggle UserChangelTitle;
 
 class View<M> {
+
+    on UserChangeTitle
     constructor(private user: User) {
-        on UserChangeTitle
         this.user.on('change:title', this.showAlert);
     }
     
@@ -64,11 +65,14 @@ class View<M> {
 ```
 The above code won't compile, since there is no `off` statement. Just adding this line will let the compiler compile:
 ```typescript
+import {UserChangeTitle} from '/model'
+
 class SuperView{
     someMethod() {
-        let view = new View(this.user);
-        view = null; // this.user persists.
-        // A memory leak, `view` cannot be garbage collected.
+        this.subView = new View(this.user);
+        off UserChangeTitle:
+        this.subView.user = null;
+        this.subView = null;
     }
 }
 ```
