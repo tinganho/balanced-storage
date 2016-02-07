@@ -28,7 +28,7 @@ class View<M> {
 }
 ```
 
-Then in some other class's method we instantiate the view with a reference user model:
+Then in some other class's method we instantiate the view with a referenced user model:
 ```typescript
 class SuperView{
     showSubView() {
