@@ -69,7 +69,7 @@ class View<M> {
     }
 }
 ```
-Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. In our previous example. Our code would not compile because we only toogle `UserChangeTitle` on. But we never toggle it off.
+Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. In our previous example. Our code would not compile because we only toogle `UserChangeTitle` `on`. But we never toggle it `off`.
 
 ```typescript
 import { UserChangeTitle } from '/model'
@@ -82,7 +82,7 @@ class SuperView{
 }
 ```
 
-Just adding the expression `this.subView.removeUser()`. Will turn the toogle off. Now, on the same scope we have a matching on off toogles. So the compiler will compile the following code.
+Just adding the expression `this.subView.removeUser()`. Will turn the toogle off. Now, on the same scope we have a matching `on` and `off` toogles. So the compiler will compile the following code.
 ```typescript
 import { UserChangeTitle } from '/model'
 
