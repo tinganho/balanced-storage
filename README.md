@@ -64,11 +64,11 @@ class View<M> {
 ```
 The above code won't compile, since there is no `off` statement. Just adding this line will let the compiler compile:
 ```typescript
-class View<M> {
-    ...
-    public remove() {
-        off UserChangeTitle
-        this.user.off('change:title', this.showAlert)
+class SuperView{
+    someMethod() {
+        let view = new View(this.user);
+        view = null; // this.user persists.
+        // A memory leak, `view` cannot be garbage collected.
     }
 }
 ```
