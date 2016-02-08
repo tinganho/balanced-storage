@@ -261,7 +261,7 @@ Not naming the above collection of toggles works as well if you only have one co
 Note, there is no compile error, even though the for loop in `removeSubViews` is not matched with `showSubView`.
 
 ```typescript
-for (let i = 0; i < 9; i++) { Loop only 9 elements and not 10 causes another memory leak.
+for (let i = 0; i < 9; i++) {// Loop only 9 elements and not 10 causes another memory leak.
 	off UserChangeTitle[] as UserChangeTitles
 	this.subView[i].removeUser();
 }
