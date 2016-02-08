@@ -1,6 +1,6 @@
 # The toogle modifier
 
-Software has been daunted with memory leaks for a long time. Both garbage collected and manual memory managed languages posses this issue. There exists one interesting question to ask, can we make memory management more safe with static code analysis?
+Software has been daunted with memory leaks for a long time. Both garbage collected and manual memory managed languages posses this issue. There exists one interesting question to ask, can we make memory management more safe with static code analysis? Can we make a compiler helps us about common mistakes made, when dealing with memory management?
 
 We extend an EventEmitter class to create a user model:
 
