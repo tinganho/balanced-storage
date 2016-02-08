@@ -50,7 +50,7 @@ this.user.on('change:title', () => {
 We want to prevent the memory leak by static code analysis. And I propose the following syntax:
 
 ```typescript
-export toggle UserChangelTitle;
+toggle UserChangelTitle;
 
 class View<M> {
 
@@ -103,7 +103,7 @@ class SuperView {
 ```
 The `on` toggle is inferred on `showSubView()`, by the following expression `new View(this.user)`. Whenever there is no matching `off` toggle, a containing method or function will have an inferred toggle.
 
-Because the above code would not compile, we previously also said that we could add one `off` toggle to the same scope as the `on` toggle. But we can also define an another method that balances the toogle. Now, the method is inferred as:
+We previously also said that we could add one `off` toggle to the same scope as the `on` toggle. But we can also define an another method that balances the toogle. Now, the method is inferred as:
 
 ```typescript
 class SuperView {
@@ -119,12 +119,13 @@ class SuperView {
 	}
 }
 ```
-It also tells the compiler, the toggle management should be off loaded to an another location and not inside `showSubView()`. This is because we balanced it with an `off` toggle. 
+This also tells the compiler, the toggle management should be off loaded to an another location and not inside `showSubView()`. This is because we balanced it with an `off` toggle. 
 
 ### Callbacks
 
 We have so far only considered object having an instant death. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler will not complain.
 
+Passing off toggle method as callback argument will match an on toggle.
 ```typescript
 class SuperView {
 	// no inferred on toggle
@@ -149,3 +150,116 @@ Now, we have ensured a possible death of our `subView`, because `this.removeSubV
 	this.subView = new View(this.user); // Turns the toggle on.
 	this.onDestroy(this.removeSubView); // `this.onDestroy` takes a certain callback. And we passed in a off toggle callback. Which mean we have a certain death for our `subView`.
 ```
+
+### Mutiple references
+
+We some times, need to deal with multiple references of the same toggle.
+
+```typescript
+
+import { View } from './view';
+
+class SuperView {
+	private subView: View;
+
+	// no inferred on toggle
+    showSubView() {
+		on UserChangeTitle as UserChangeTitleOnSubView
+        this.subView = new View(this.user); // Turns the toggle on.
+		on UserChangeTitle as UserChangeTitleOnAnotherSubView
+        this.anotherSubView = new View(this.user); // Turns the toggle on.
+    }
+	
+	onDestroy(callback: () => void) {
+		this.deleteButton.addEventListener(callback); 
+	}
+	
+	removeSubView() {
+		off UserChangeTitle as UserChangeTitleOnSubView
+        this.subView.removeUser(); // Turns the toggle off.
+        this.subView = null;
+	}
+	
+	removeAnotherSubView() {
+		off UserChangeTitle as UserChangeTitleOnAnotherSubView
+        this.anotherSubView.removeUser(); // Turns the toggle off.
+        this.subView = null;
+	}
+}
+```
+
+When dealing with collection, it is good practice to have already balanced constructors/methods.
+```typescript
+import { View } from './view';
+
+class SuperView {
+	private subViews: View[] = [];
+    showSubViews() {
+		for (let i = 0; i < 10; i++) {
+        	this.subViews.push(new View(this.user)); // The constructor is already balanced. So the compiler will not complain.
+		}
+    }
+}
+```
+For unbalanced methods the following code will not compile:
+
+```typescript
+class SuperView {
+	private subViews: View[] = [];
+	
+    showSubViews() {
+		for (let i = 0; i < 10; i++) {
+        	this.subView.push(new View(this.user));
+		}
+    }
+}
+```
+
+We would need add a named collection toggle for this.
+```typescript
+class SuperView {
+	private subViews: View[] = [];
+	
+    showSubViews() {
+		for (let i = 0; i < 10; i++) {
+			on UserChangelTitle as UserChangelTitles // We name a collection of toggles as UserChangelTitles
+        	this.subView.push(new View(this.user));
+		}
+    }
+}
+```
+A collection of toggles is denoted as `UserChangeTitle[]` and there is no assurance of the length of a collection. The above code needs to be balanced. We haven't defined an off toggle yet.
+```typescript
+class SuperView {
+	private subViews: View[] = [];
+	
+    showSubViews() {
+		for (let i = 0; i < 10; i++) {
+			on UserChangelTitle[] as UserChangelTitles // We name a collection of toggles as UserChangelTitles
+        	this.subView.push(new View(this.user));
+		}
+		this.onDestroy(this.removeSubViews);
+    }
+	
+	onDestroy(callback: () => void) {
+		this.deleteAllButton.addEventListener(callback); 
+	}
+	
+	removeSubViews() {
+		for (let i = 0; i < 10; i++) {
+			off UserChangeTitle[] as UserChangelTitles
+        	this.subView[i].removeUser();
+		}
+		this.subView = [];
+    }
+}
+```
+Not naming the above collection toggles works as well if you only have one collection of toggles. Note, there is no compile error, even though the for loop in `removeSubViews` is not matched with `showSubView`.
+
+```typescript
+for (let i = 0; i < 10; i++) {
+	off UserChangeTitle[] as UserChangelTitles
+	this.subView[i].removeUser();
+}
+```
+This is because it is very difficult to that kind of assertion. Though we match the symbol of `UserChangelTitles`. That alone gives some safety.
