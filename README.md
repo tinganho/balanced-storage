@@ -90,7 +90,7 @@ class SuperView {
     }
 }
 ```
-But if we don't add the toggle `off` expression above. Our code it would be inferred as:
+But if we don't add the toggle `off` expression above. Our code would be inferred as:
 
 ```typescript
 class SuperView {
@@ -254,10 +254,12 @@ class SuperView {
     }
 }
 ```
-Not naming the above collection toggles works as well if you only have one collection of toggles. Note, there is no compile error, even though the for loop in `removeSubViews` is not matched with `showSubView`.
+Not naming the above collection toggles works as well if you only have one collection of toggles. 
+
+Note, there is no compile error, even though the for loop in `removeSubViews` is not matched with `showSubView`.
 
 ```typescript
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 9; i++) { Loop only 9 elements and not 10 causes another memory leak.
 	off UserChangeTitle[] as UserChangelTitles
 	this.subView[i].removeUser();
 }
