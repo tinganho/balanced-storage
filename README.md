@@ -38,12 +38,13 @@ class SuperView{
     }
 }
 ```
-Did you spot what was causing the memory leak? It is on this line:
+As you can see we did a mistake. We unreferenced the sub view. And we expected it to be garbage collected. But instead we caused a memory leak. Did you spot in which line was causing a memory leak? It is on this line:
 ```typescript
 this.user.on('change:title', () => {
     this.showAlert(); // `this` is referencing view. So `this.user` is referencing `view`.
 });
 ```
+As the comment says, `this` is referencing view. So `this.user` is referencing `view`. Because the reference count haven't reached zero, the garbabge collector cannot garbage collect the sub view.
 
 ### Proposal
 
