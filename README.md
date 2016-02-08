@@ -222,7 +222,7 @@ class SuperView {
 	
     showSubViews() {
 		for (let i = 0; i < 10; i++) {
-			on UserChangelTitle as UserChangelTitles // We name a collection of toggles as UserChangelTitles
+			on UserChangelTitle[] as UserChangelTitles // We name a collection of toggles as UserChangelTitles
         	this.subView.push(new View(this.user));
 		}
     }
