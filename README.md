@@ -125,7 +125,7 @@ This also tells the compiler, the toggle management should be off loaded to an a
 
 We have so far only considered object having an instant death. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler will not complain.
 
-Passing off toggle method as callback argument will match an on toggle.
+Passing an off toggle method as callback argument will match an on toggle.
 ```typescript
 class SuperView {
 	// no inferred on toggle
@@ -155,6 +155,7 @@ Now, we have ensured a possible death of our `subView`, because `this.removeSubV
 
 We some times, need to deal with multiple references of the same toggle.
 
+We can alias the toggles. Having multiple togggles with the same name will generate a compile error.
 ```typescript
 
 import { View } from './view';
@@ -215,14 +216,14 @@ class SuperView {
 }
 ```
 
-We would need add a named collection toggle for this.
+We would need to add a named collection of toggles for this.
 ```typescript
 class SuperView {
 	private subViews: View[] = [];
 	
     showSubViews() {
 		for (let i = 0; i < 10; i++) {
-			on UserChangelTitle[] as UserChangelTitles // We name a collection of toggles as UserChangelTitles
+			on UserChangelTitle[] as UserChangeTitles // We name a collection of toggles as UserChangeTitles
         	this.subView.push(new View(this.user));
 		}
     }
@@ -235,10 +236,10 @@ class SuperView {
 	
     showSubViews() {
 		for (let i = 0; i < 10; i++) {
-			on UserChangelTitle[] as UserChangelTitles // We name a collection of toggles as UserChangelTitles
+			on UserChangelTitle[] as UserChangeTitles // We name a collection of toggles as UserChangeTitles
         	this.subView.push(new View(this.user));
 		}
-		this.onDestroy(this.removeSubViews);
+		this.onDestroy(this.removeSubViews); // This line tells the compiler the toggle(memory) management shoud be done here.
     }
 	
 	onDestroy(callback: () => void) {
@@ -247,21 +248,21 @@ class SuperView {
 	
 	removeSubViews() {
 		for (let i = 0; i < 10; i++) {
-			off UserChangeTitle[] as UserChangelTitles
+			off UserChangeTitle[] as UserChangeTitles
         	this.subView[i].removeUser();
 		}
 		this.subView = [];
     }
 }
 ```
-Not naming the above collection toggles works as well if you only have one collection of toggles. 
+Not naming the above collection of toggles works as well if you only have one collection of toggles.
 
 Note, there is no compile error, even though the for loop in `removeSubViews` is not matched with `showSubView`.
 
 ```typescript
 for (let i = 0; i < 9; i++) { Loop only 9 elements and not 10 causes another memory leak.
-	off UserChangeTitle[] as UserChangelTitles
+	off UserChangeTitle[] as UserChangeTitles
 	this.subView[i].removeUser();
 }
 ```
-This is because it is very difficult to that kind of assertion. Though we match the symbol of `UserChangelTitles`. That alone gives some safety.
+This is because it is very difficult to do that kind of assertion. Though, we match the symbol of `UserChangeTitles` and that alone gives us some safety.
