@@ -1,9 +1,25 @@
-# The toogle modifier
+Static Code Analyzation and Prevention of Memory Leaks
+====================
 
-Software has been daunted with memory leaks for a long time. Both garbage collected and manual memory managed languages posses this issue. There exists one interesting question to ask, can we make memory management more safe with static code analysis? Can we make a compiler helps us about common mistakes made, when dealing with memory management?
+Software has been daunted with memory leaks for a long time. There exists one interesting question to ask, can we make memory management more safe with static code analysis? Can we make a compiler help us with common mistakes made, when dealing with memory management?
 
+# Contents
+* [Defintiion](#definition)
+* [Common Patterns](#problem)
+  * [Event Emitter Pattern](#event-emitter-pattern)
+* [Proposal](#proposal)
+
+# Definition
+A memory leak is objects we intended to delete. But instead of being deleted, they remained on the runtime.
+
+# Memory Mistake
+Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counted smart pointers. We will try to cover some of these problems and present a sound solution for these problems.
+
+# Common Patterns
+We will try to describe common patterns for memory leaks. We use TypeScript as our programming language.
+
+#### Event Emitter Pattern
 We extend an EventEmitter class to create a user model:
-
 ```typescript
 class User extends EventEmitter {
     private title: string;
@@ -43,10 +59,10 @@ class SuperView{
 As you can see we did a mistake. We unreferenced the sub view. And we expected it to be garbage collected. But instead we caused a memory leak. Did you spot in which line was causing a memory leak? It is on this line:
 ```typescript
 this.user.on('change:title', () => {
-    this.showAlert(); // `this` is referencing view. So `this.user` is referencing `view`.
+    this.showAlert(); // `this` inside the closure is referencing view. So `this.user` is referencing `view`.
 });
 ```
-As the comment says, `this` is referencing view. So `this.user` is referencing `view`. Because the reference count haven't reached zero, the garbabge collector cannot garbage collect the sub view.
+As the comment says, `this` inside the closure is referencing  the view. So `this.user` is referencing `view`. Because the reference count haven't reached zero, the garbabge collector cannot garbage collect the sub view.
 
 ### Proposal
 
