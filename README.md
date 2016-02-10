@@ -13,7 +13,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
 A memory leak is objects we intended to delete. But instead of being deleted, they remained on the runtime.
 
 # Memory Mistake
-Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counted smart pointers. We will try to cover some of these problems and present a sound solution for these problems.
+Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counted smart pointers. We will try to cover some of these problems and present a solution to these problems.
 
 # Common Patterns
 We will try to describe common patterns for memory leaks. We use TypeScript as our programming language.
@@ -31,7 +31,6 @@ class User extends EventEmitter {
 }
 ```
 We also define the following view class:
-
 ```typescript
 class View<M> {
     constructor(private user: User) {
@@ -66,21 +65,79 @@ As the comment says, `this` inside the closure is referencing  the view. So `thi
 
 ### Proposal
 
-We want to prevent the memory leak by static code analysis. And I propose the following syntax:
+We want to prevent the memory leak by static code analysis. But, in doing so we must analyse the source of memory leaks. By definition a memory leak is an unused resource on runtime. We allocate memory and initialize our resource. When the resource is no longer needed we need to deallocate it. In a garbage collected language we can unreference objects so they get garbage collected. And for a manual manage memory programming languages, we must deallocate it manually by writing some sort of expressions. In a majority of cases, if not all, a memory leaked resource often has one or more references to itself. In a garbage collected language they always have at least one reference to itself(otherwise they would be garbage collected). 
+
+I propose, that methods that uses these references, to be annotated. I have not shown you the `EventEmitter` class yet and lets begin by showing it to you first:
 
 ```typescript
-toggle UserChangelTitle;
+export class EventEmitter {
+    public eventCallbackStore: EventCallbackStore = {}
 
+    public on(event: string, callback: Callback) {
+        if (!this.eventCallbackStore[event]) {
+            this.eventCallbackStore[event] = [];
+        }
+        this.eventCallbackStore[event].push(callback);
+    }
+
+    public off(event: string, callback: Callback): void {
+        let callbacks = this.eventCallbackStore[event].length;
+        for (let i = 0;i < callback.length; i++) {
+            if (this.eventCallbackStore[event][i] === callback) {
+                this.eventCallbackStore[event].splice(i, 1);
+            }
+        }
+    }
+
+    public emit(event: string, args: any[]) {
+        if (this.eventCallbackStore[event]) {
+            for (let callback of this.eventCallbackStore[event]) {
+                callback.apply(null, args);
+            }
+        }
+    }
+}
+```
+The `eventCallbackStore` above is hashmap of a list of callbacks for each event. We register new events with the `on(...)` method and unregister them with the `off(...)` method. We can emit a new event with the `emit(...)` method. The property `eventCallbackStore` is a potential leaking resource, because it can hold callbacks on events and a developer might forgot to unregister some of those events when no longer needed. Though the essentials here, is the `on` and `off` method. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `on` always call `off`? Let us answer this question later, and begin with annotating them first. 
+I propose in this case, the following annotation syntax:
+```
+[on|off] IDENTIFIER
+```
+The `on` and `off` is an operator that annotates methods with an toogle identifier. So for our `User` model which is an extension of the `EventEmitter`, we go ahead and annotate the method with `on` and `off`.
+```typescript
+export class User extends EventEmitter {
+    on UserChangelTitle
+    public on(event: string, callback: Callback) {
+        super.on.apply(this, arguments);
+    }
+    
+    off UserChangelTitle
+    public off(event: string, callback: Callback): void {
+        super.off.apply(this, arguments);
+    }
+}
+```
+
+Now, every consumer of these two methods will have some additional checks that they need to pass. First, if they are in the same scope they need to call `on` first before `off`. 
+
+```typescript
 class View<M> {
+    constructor(private user: User) {
+        this.user.on('change:title', this.showAlert);
+        this.user.off('change:title', this.showAlert);
+    }
+}
+```
+Though, in this case having the method calls on the same scope is not quite useful. Since we unregister the event directly. It would be as good as not calling anything at all. But in order to pass the compiler check we can also call the `off` toogle in another method. The `off` toogle is the `off` annotated method.
 
-    on UserChangeTitle
+```typescript
+class View<M> {
     constructor(private user: User) {
         this.user.on('change:title', this.showAlert);
     }
     
-    off UserChangeTitle
     public removeUser() {
-        this.user = null;
+        this.user.off('change:title', this.showAlert);
     }
     
     public showAlert(title: string) {
@@ -88,6 +145,8 @@ class View<M> {
     }
 }
 ```
+Notice first, that when 
+
 Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. In our previous example, our code would not compile because we only toogle `UserChangeTitle` `on`. But we never toggle it `off`.
 
 ```typescript
@@ -122,7 +181,7 @@ class SuperView {
 ```
 The `on` toggle is inferred on `showSubView()`, by the following expression `new View(this.user)`. Whenever there is no matching `off` toggle, a containing method or function will have an inferred toggle.
 
-We previously also said that we could add one `off` toggle to the same scope as the `on` toggle. But we can also define an another method that balances the toogle. Now, the method is inferred as:
+We previously also said, that we could add one `off` toggle to the same scope as the `on` toggle. But we can also define an another method that balances the toogle. Now, the method is inferred as:
 
 ```typescript
 class SuperView {
