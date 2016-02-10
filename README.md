@@ -1,24 +1,28 @@
 Static Code Analyzation and Prevention of Memory Leaks
 ====================
 
+# Abstract
 Software has been daunted with memory leaks for a long time. There exists one interesting question to ask, can we make memory management more safe with static code analysis? Can we make a compiler help us with common mistakes made, when dealing with memory management?
 
 # Table of Contents
-* [Defintiion](#definition)
-* [Memory Mistakes](#example)
+* [Abstract](#abstract)
+* [Memory Leaks](#memory-leaks)
+  * [Defintiion](#definition)
   * [Event Emitter Example](#event-emitter-example) 
-* [Toogle Annotation](#proposal)
+* [Toogle Annotation](#toogle-annotation)
   * [Syntax](#syntax)
   * [Inheritance](#inheritance)
-  * [Callback](#callback)
-
-# Definition
-A memory leak is objects we intended to delete. But instead of being deleted, they remained on the runtime.
+  * [Callbacks](#callbacks)
+  * [Multiple References](#multiple-references)
+  * [Collections](#collections)
 
 # Memory Mistakes
 Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counted smart pointers. We will try to cover some of these problems and present a solution to these problems.
 
-# Example
+## Definition
+A memory leak is objects we intended to delete. But instead of being deleted, they remained on the runtime.
+
+## Example
 We extend an EventEmitter class to create a user model:
 ```typescript
 class User extends EventEmitter {
@@ -142,7 +146,7 @@ class View<M> {
     }
 }
 ```
-### Inheritance
+## Inheritance
 Notice first, that whenever there is a scope with an unmatched `on` or `off` toggles. The unmatched toogle annotates the containing method. Here we show the inherited annotation in comments below:
 ```typescript
 class View<M> {
@@ -196,7 +200,7 @@ class SuperView {
 ```
 The method `showSubView` inherited the `on` toggle from the expression `new View(this.user)`. This inheritance loop goes on and on.
 
-### Callbacks
+## Callbacks
 
 We have so far only considered object having an instant death. And this is not so useful for our application. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler will not complain. Now this leads us to our next rule:
 
@@ -233,7 +237,7 @@ BIRTH ?---> CALL1 ?---> CALL2 ?---> CALLN ?---> DEATH
 ```
 Notice that we say possible death and not certain death. We will get back to this later.
 
-### Mutiple references
+## Mutiple references
 
 We some times, need to deal with multiple references of the same toggle.
 
