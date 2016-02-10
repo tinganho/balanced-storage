@@ -237,7 +237,7 @@ BIRTH ?---> CALL1 ?---> CALL2 ?---> CALLN ?---> DEATH
 ```
 Notice that we say possible death and not certain death. We will get back to this later.
 
-## Multiple references
+## Multiple References
 
 We some times, need to deal with multiple references of the same toggle. Like for instance, when we instantiate multiple objects of the same class. The compiler will not pass the code if there is two toggles that have the same name. This is because we want associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
 
@@ -282,9 +282,27 @@ class SuperView {
         this.subView = null;
 	}
 }
+
+Notice that the anonymous lambda function will inherit the annotations:
+```typescript
+// off UserChangeTitleOnSubView
+// off UserChangeTitleOnAnotherSubView
+() => {
+    this.removeSubView();
+    this.removeAnotherSubView();
+}
 ```
+This is due to the fact that the lambda's function's scope does not have matching `on` toggles. But also the since `this.onDestroy` is a method which accept callbacks, it will balance the both on toggles:
+```typescript
+on UserChangeTitle as UserChangeTitleOnSubView
+this.subView = new View(this.user); // Turns the toggle on.
+on UserChangeTitle as UserChangeTitleOnAnotherSubView
+this.anotherSubView = new View(this.user); // Turns the toggle on.
+```
+So in other words, The above code will compile. It also causes no memory leaks.
+
 ### Collections
-When dealing with collection, it is good practice to have already balanced constructors/methods.
+When dealing with collection, it is good practice to have already balanced toggles on constructors or methods.
 ```typescript
 import { View } from './view';
 
@@ -297,7 +315,7 @@ class SuperView {
     }
 }
 ```
-For unbalanced methods the following code will not compile:
+For unbalanced methods, even inside control flow statements, the containing method will inherit toggle annotations.
 ```typescript
 class SuperView {
 	private subViews: View[] = [];
@@ -309,11 +327,12 @@ class SuperView {
     }
 }
 ```
-We would need to add a named collection of toggles for this.
+For convenience, since we are dealing with collecitons. We name the toggle to `UserChangeTitles` below, since we are dealing with collections:
 ```typescript
 class SuperView {
 	private subViews: View[] = [];
 	
+	// 
     showSubViews() {
 		for (let i = 0; i < 10; i++) {
 			on UserChangelTitle as UserChangeTitles // We name a collection of toggles as UserChangeTitles
@@ -322,40 +341,52 @@ class SuperView {
     }
 }
 ```
-A collection of toggles is denoted as `UserChangeTitle` and there is no assurance of the length of a collection. The above code needs to be balanced. We haven't defined an off toggle yet.
+As before, we would need to have a matching off toggle annotated method to satisfy our compiler:
 ```typescript
 class SuperView {
 	private subViews: View[] = [];
 	
-    showSubViews() {
-		for (let i = 0; i < 10; i++) {
-			on UserChangelTitle[] as UserChangeTitles // We name a collection of toggles as UserChangeTitles
-        	this.subView.push(new View(this.user));
-		}
-		this.onDestroy(this.removeSubViews); // This line tells the compiler the toggle(memory) management shoud be done here.
-    }
-	
-	onDestroy(callback: () => void) {
-		this.deleteAllButton.addEventListener(callback); 
-	}
-	
+	// off UserChangeTitles
 	removeSubViews() {
 		for (let i = 0; i < 10; i++) {
-			off UserChangeTitle[] as UserChangeTitles
+			off UserChangeTitle as UserChangeTitles
         	this.subView[i].removeUser();
 		}
 		this.subView = [];
     }
 }
 ```
-Not naming the above collection of toggles works as well if you only have one collection of toggles.
+Now our whole class will look like this:
+```typescript
+class SuperView {
+    private subViews: View[] = [];
 
-Note, there is no compile error, even though the for loop in `removeSubViews` is not matched with `showSubView`.
+    showSubViews() {
+        for (let i = 0; i < 10; i++) {
+            on UserChangelTitle as UserChangeTitles
+            this.subView.push(new View(this.user));
+        }
+        this.onDestroy(this.removeSubViews);
+    }
 
+    onDestroy(callback: () => void) {
+        this.deleteAllButton.addEventListener(callback); 
+    }
+
+    removeSubViews() {
+        for (let i = 0; i < 10; i++) {
+            off UserChangeTitle[] as UserChangeTitles
+            this.subView[i].removeUser();
+        }
+        this.subView = [];
+    }
+}
+```
+Note, there is no compile error, even though the for loop in `removeSubViews` is not matched with `showSubView`. Like for instance, if we would have only looped 9 loops instead of 10:
 ```typescript
 for (let i = 0; i < 9; i++) {// Loop only 9 elements and not 10 causes another memory leak.
 	off UserChangeTitle[] as UserChangeTitles
 	this.subView[i].removeUser();
 }
 ```
-This is because it is very difficult to do that kind of assertion. Though, we match the symbol of `UserChangeTitles` and that alone gives us some safety.
+This is because it is very difficult to do that kind of assertion. A compiler cannot know the business logic of your application and thus cannot make that assertion. Though, we match the symbol of `UserChangeTitles` and that alone gives us some safety.
