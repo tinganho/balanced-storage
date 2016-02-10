@@ -145,12 +145,12 @@ Notice first, that whenever there is a scope with an unmatched `on` or `off` tog
 class View<M> {
     // on UserChangeTitle
     constructor(private user: User) {
-        this.user.on('change:title', this.showAlert);
+        this.user.register('change:title', this.showAlert);
     }
     
     // off UserChangeTitle
     public removeUser() {
-        this.user.off('change:title', this.showAlert);
+        this.user.unregister('change:title', this.showAlert);
     }
     
     public showAlert(title: string) {
