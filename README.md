@@ -8,6 +8,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
 * [Common Patterns](#problem)
   * [Event Emitter Pattern](#event-emitter-pattern)
 * [Proposal](#proposal)
+  * [Inheritance](#inheritance)
 
 # Definition
 A memory leak is objects we intended to delete. But instead of being deleted, they remained on the runtime.
@@ -65,7 +66,7 @@ As the comment says, `this` inside the closure is referencing  the view. So `thi
 
 ### Proposal
 
-We want to prevent the memory leak by static code analysis. But, in doing so we must analyse the source of memory leaks. By definition a memory leak is an unused resource on runtime. We allocate memory and initialize our resource. When the resource is no longer needed we need to deallocate it. In a garbage collected language we can unreference objects so they get garbage collected. And for a manual manage memory programming languages, we must deallocate it manually by writing some sort of expressions. In a majority of cases, if not all, a memory leaked resource often has one or more references to itself. In a garbage collected language they always have at least one reference to itself(otherwise they would be garbage collected). 
+We want to prevent the memory leak by static code analysis. But, in doing so we must analyse the source of memory leaks. By definition a memory leak is an unused resource at runtime. We allocate memory and initialize our resource. When the resource is no longer needed we need to deallocate it. In a garbage collected language we can unreference objects so they get garbage collected. And for a manual manage memory programming languages, we must deallocate it manually by writing some sort of expressions. In a majority of cases, if not all, a memory leaked resource often has one or more references to itself. In a garbage collected language they always have at least one reference to itself(otherwise they would be garbage collected). 
 
 I propose, that methods that uses these references, to be annotated. I have not shown you the `EventEmitter` class yet and lets begin by showing it to you first:
 
@@ -73,14 +74,14 @@ I propose, that methods that uses these references, to be annotated. I have not 
 export class EventEmitter {
     public eventCallbackStore: EventCallbackStore = {}
 
-    public on(event: string, callback: Callback) {
+    public register(event: string, callback: Callback) {
         if (!this.eventCallbackStore[event]) {
             this.eventCallbackStore[event] = [];
         }
         this.eventCallbackStore[event].push(callback);
     }
 
-    public off(event: string, callback: Callback): void {
+    public unregister(event: string, callback: Callback): void {
         let callbacks = this.eventCallbackStore[event].length;
         for (let i = 0;i < callback.length; i++) {
             if (this.eventCallbackStore[event][i] === callback) {
@@ -98,7 +99,7 @@ export class EventEmitter {
     }
 }
 ```
-The `eventCallbackStore` above is hashmap of a list of callbacks for each event. We register new events with the `on(...)` method and unregister them with the `off(...)` method. We can emit a new event with the `emit(...)` method. The property `eventCallbackStore` is a potential leaking resource, because it can hold callbacks on events and a developer might forgot to unregister some of those events when no longer needed. Though the essentials here, is the `on` and `off` method. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `on` always call `off`? Let us answer this question later, and begin with annotating them first. 
+The `eventCallbackStore` above is hashmap of a list of callbacks for each event. We register new events with the `on` method and unregister them with the `unregister` method. We can emit a new event with the `emit` method. The property `eventCallbackStore` is a potential leaking resource, because it can hold callbacks on events and a developer might forgot to unregister some of those events when no longer needed. Though the essentials here, is the `register` and `unregister` methods. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `register` always call `unregister`? If possible, we would prevent having any memory leaks. Let us answer this question later, and begin with annotating them first. 
 I propose in this case, the following annotation syntax:
 ```
 [on|off] IDENTIFIER
@@ -107,19 +108,17 @@ The `on` and `off` is an operator that annotates methods with an toogle identifi
 ```typescript
 export class User extends EventEmitter {
     on UserChangelTitle
-    public on(event: string, callback: Callback) {
+    public register(event: string, callback: Callback) {
         super.on.apply(this, arguments);
     }
     
     off UserChangelTitle
-    public off(event: string, callback: Callback): void {
+    public unregister(event: string, callback: Callback): void {
         super.off.apply(this, arguments);
     }
 }
 ```
-
 Now, every consumer of these two methods will have some additional checks that they need to pass. First, if they are in the same scope they need to call `on` first before `off`. 
-
 ```typescript
 class View<M> {
     constructor(private user: User) {
@@ -128,8 +127,7 @@ class View<M> {
     }
 }
 ```
-Though, in this case having the method calls on the same scope is not quite useful. Since we unregister the event directly. It would be as good as not calling anything at all. But in order to pass the compiler check we can also call the `off` toogle in another method. The `off` toogle is the `off` annotated method.
-
+Though, in this case having the method calls on the same scope is not quite useful. Since we unregister the event directly. It would be as good as not calling anything at all. But in order to pass the compiler checks we can also call the `off` toogle in another method. The `off` toogle is the `off` annotated method, in this case the `unregister` method.
 ```typescript
 class View<M> {
     constructor(private user: User) {
@@ -145,31 +143,49 @@ class View<M> {
     }
 }
 ```
-Notice first, that when 
+Notice first, that whenever there is a scope with an unmatched `on` or `off` toggles. The unmatched toogle annotation annotates the containing method. Here we show the inferred annotation in comments below:
+```typescript
+class View<M> {
+    // on UserChangeTitle
+    constructor(private user: User) {
+        this.user.on('change:title', this.showAlert);
+    }
+    
+    // off UserChangeTitle
+    public removeUser() {
+        this.user.off('change:title', this.showAlert);
+    }
+    
+    public showAlert(title: string) {
+        alert(title);
+    }
+}
+```
+The methods in our class is now balanced. This leads us to our second rule. A class's method's needs to have balanced toogle annotations. And when a class is balanced it implicitly infers that the a balance check should be done in an another scope than in the current class's methods. This could be an another class's method that uses this class's `on` toggle.
 
-Whenever you toogle on something you must toogle it off. Otherwise the compiler won't compile. In our previous example, our code would not compile because we only toogle `UserChangeTitle` `on`. But we never toggle it `off`.
-
+Now, let use the abve class in a class we call `SuperView`.
 ```typescript
 class SuperView {
     showSubView() {
-        this.subView = new View(this.user); // Turns the toggle on.
+        this.subView = new View(this.user); // This call has an on toggle.
         this.subView = null;
     }
 }
 ```
+The bove code does not pass the check, because there is no matching `off` toogle. Also the code causes a memory leak.
 
-Just adding the call expression `this.subView.removeUser()` below. Will turn the toogle `off`. Now, on the same scope we have a matching `on` and `off` toogles. So the compiler will compile the following code.
+### Inheritance
+Just adding the call expression `this.subView.removeUser()` below, will match our `on` toogle. Now, on the same scope we have a matching `on` and `off` toogles. So the compiler will compile the following code, also the code causes no memory leaks:
 ```typescript
 class SuperView {
     showSubView() {
-        this.subView = new View(this.user); // Turns the toggle on.
-        this.subView.removeUser(); // Turns the toggle off.
+        this.subView = new View(this.user); // On toggle.
+        this.subView.removeUser(); // Off toggle.
         this.subView = null;
     }
 }
 ```
-But if we don't add the toggle `off` expression above. Our code would be inferred as:
-
+But if we don't add the toggle `off` expression above. The containing method will be annotated as:
 ```typescript
 class SuperView {
 	// on UserChangeTitle
@@ -179,7 +195,7 @@ class SuperView {
     }
 }
 ```
-The `on` toggle is inferred on `showSubView()`, by the following expression `new View(this.user)`. Whenever there is no matching `off` toggle, a containing method or function will have an inferred toggle.
+The `on` toggle is inherited on `showSubView()`, by the following expression `new View(this.user)`. Whenever there is no matching `off` toggle, a containing method or function will be annotated with an `on` toggle. The above code will not compile because there is neither a matching off annotation on the class's methods or the scope of `showSubView` does not have matching `off` toggle.
 
 We previously also said, that we could add one `off` toggle to the same scope as the `on` toggle. But we can also define an another method that balances the toogle. Now, the method is inferred as:
 
@@ -201,9 +217,9 @@ This also tells the compiler, the toggle management should be off loaded to an a
 
 ### Callbacks
 
-We have so far only considered object having an instant death. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler will not complain.
+We have so far only considered object having an instant death. And this is not so useful for our application. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler will not complain.
 
-Passing an off toggle method as callback argument will match an on toggle.
+Passing an `off` toggle method as callback argument will match an `on` toggle method.
 ```typescript
 class SuperView {
 	// no inferred on toggle
@@ -226,9 +242,13 @@ class SuperView {
 Now, we have ensured a possible death of our `subView`, because `this.removeSubView` has an inferred `off` toggle:
 ```typescript
 	this.subView = new View(this.user); // Turns the toggle on.
-	this.onDestroy(this.removeSubView); // `this.onDestroy` takes a certain callback. And we passed in a off toggle callback. Which mean we have a certain death for our `subView`.
+	this.onDestroy(this.removeSubView); // `this.onDestroy` takes a callback. And we passed in a off toggle callback. Which mean we have a possible death for our `subView`.
 ```
-
+The scope is matched and the compiler will not complain. Notice whenever `on` is toggled `off` directly or whenever there a call path that can be reached, to match the `on` toggle. The code will pass the check. Because in other words, we have ensured a possible death of our allocated resources.
+```
+BIRTH ----> DEATH
+BIRTH --- CALL1 --- CALL2 --- DEATH
+```
 ### Mutiple references
 
 We some times, need to deal with multiple references of the same toggle.
