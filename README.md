@@ -110,12 +110,12 @@ I propose in this case, the following annotation syntax:
 The `on` and `off` is an operator that annotates methods with an toogle identifier. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and annotate the method with `on` and `off`.
 ```typescript
 export class User extends EventEmitter {
-    on UserChangelTitle
+    on UserChangeTitle
     public register(event: string, callback: Callback) {
         super.register.apply(this, arguments);
     }
     
-    off UserChangelTitle
+    off UserChangeTitle
     public unregister(event: string, callback: Callback): void {
         super.unregister.apply(this, arguments);
     }
@@ -315,27 +315,17 @@ class SuperView {
     }
 }
 ```
-For unbalanced methods, even inside control flow statements, the containing method will inherit toggle annotations.
+Because we don't need to deal with an even more complex matching of toggles.
+
+For various reason, if one cannot use unbalanced methods. The toggle conventions works as before. Even on a for loop below:
 ```typescript
 class SuperView {
 	private subViews: View[] = [];
 	
+	// on UserChangeTitle
     showSubViews() {
 		for (let i = 0; i < 10; i++) {
-        	this.subView.push(new View(this.user));
-		}
-    }
-}
-```
-For convenience, since we are dealing with collecitons. We name the toggle to `UserChangeTitles` below, since we are dealing with collections:
-```typescript
-class SuperView {
-	private subViews: View[] = [];
-	
-	// 
-    showSubViews() {
-		for (let i = 0; i < 10; i++) {
-			on UserChangelTitle as UserChangeTitles // We name a collection of toggles as UserChangeTitles
+		    on UserChangeTitle as UserChangeTitles
         	this.subView.push(new View(this.user));
 		}
     }
@@ -364,7 +354,7 @@ class SuperView {
     showSubViews() {
         for (let i = 0; i < 10; i++) {
             on UserChangelTitle as UserChangeTitles
-            this.subView.push(new View(this.user));
+            this.subViews.push(new View(this.user));
         }
         this.onDestroy(this.removeSubViews);
     }
@@ -375,8 +365,8 @@ class SuperView {
 
     removeSubViews() {
         for (let i = 0; i < 10; i++) {
-            off UserChangeTitle[] as UserChangeTitles
-            this.subView[i].removeUser();
+            off UserChangeTitle as UserChangeTitles
+            this.subViews[i].removeUser();
         }
         this.subView = [];
     }
