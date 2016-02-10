@@ -104,6 +104,8 @@ export class EventEmitter {
 }
 ```
 The `eventCallbackStore` above is hashmap of a list of callbacks for each event. We register new events with the `on` method and unregister them with the `unregister` method. We can emit a new event with the `emit` method. The property `eventCallbackStore` is a potential leaking resource storage, because it can hold callbacks on events and a developer might forgot to unregister some of those events when no longer needed. Though the essentials here, is the `register` and `unregister` methods. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `register` always call `unregister`? If possible, we would prevent having any memory leaks. Let us answer this question later, and begin with annotating them first. 
+
+## Syntax
 I propose in this case, the following annotation syntax:
 ```
 [on|off] IDENTIFIER
