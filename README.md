@@ -282,7 +282,7 @@ class SuperView {
         this.subView = null;
 	}
 }
-
+```
 Notice that the anonymous lambda function will inherit the annotations:
 ```typescript
 // off UserChangeTitleOnSubView
