@@ -100,17 +100,17 @@ I propose in this case, the following annotation syntax:
 ```
 [on|off] IDENTIFIER
 ```
-The `on` and `off` is an operator that annotates methods with an toogle identifier. So for our `User` model which is an extension of the `EventEmitter` ckass, we go ahead and annotate the method with `on` and `off`.
+The `on` and `off` is an operator that annotates methods with an toogle identifier. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and annotate the method with `on` and `off`.
 ```typescript
 export class User extends EventEmitter {
     on UserChangelTitle
     public register(event: string, callback: Callback) {
-        super.on.apply(this, arguments);
+        super.register.apply(this, arguments);
     }
     
     off UserChangelTitle
     public unregister(event: string, callback: Callback): void {
-        super.off.apply(this, arguments);
+        super.unregister.apply(this, arguments);
     }
 }
 ```
@@ -127,11 +127,11 @@ Though, in this case having the method calls on the same scope is not quite usef
 ```typescript
 class View<M> {
     constructor(private user: User) {
-        this.user.on('change:title', this.showAlert);
+        this.user.register('change:title', this.showAlert);
     }
     
     public removeUser() {
-        this.user.off('change:title', this.showAlert);
+        this.user.unregister('change:title', this.showAlert);
     }
     
     public showAlert(title: string) {
@@ -139,6 +139,7 @@ class View<M> {
     }
 }
 ```
+### Inheritance
 Notice first, that whenever there is a scope with an unmatched `on` or `off` toggles. The unmatched toogle annotates the containing method. Here we show the inherited annotation in comments below:
 ```typescript
 class View<M> {
@@ -159,7 +160,6 @@ class View<M> {
 ```
 The methods in our class is now balanced. This leads us to our second rule. A class's method's needs to have balanced toogle annotations. And when a class is balanced it implicitly infers that the a balance check should be done in an another scope than in the current class's methods. This could be an another class's method that uses this class's `on` toggle.
 
-### Inheritance
 Now, let use the abve class in a class we call `SuperView`:
 ```typescript
 class SuperView {
