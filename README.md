@@ -237,7 +237,7 @@ BIRTH ?---> CALL1 ?---> CALL2 ?---> CALLN ?---> DEATH
 ```
 Notice that we say possible death and not certain death. We will get back to this later.
 
-## Mutiple references
+## Multiple references
 
 We some times, need to deal with multiple references of the same toggle. Like for instance, when we instantiate multiple objects of the same class. The compiler will not pass the code if there is two toggles that have the same name. This is because we want associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
 
