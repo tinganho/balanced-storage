@@ -147,7 +147,7 @@ class View<M> {
 }
 ```
 ## Inheritance
-Notice first, that whenever there is a scope with an unmatched `on` or `off` toggles. The unmatched toogle annotates the containing method. Here we show the inherited annotation in comments below:
+Notice first, that whenever there is a scope with an unmatched `on` or `off` toggles. The unmatched toogle annotates the containing method. Here we show the inherited annotation in the comments below:
 ```typescript
 class View<M> {
     // on UserChangeTitle
@@ -202,7 +202,7 @@ The method `showSubView` inherited the `on` toggle from the expression `new View
 
 ## Callbacks
 
-We have so far only considered object having an instant death. And this is not so useful for our application. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler will not complain. Now this leads us to our next rule:
+We have so far only considered object having an instant death. And this is not so useful for our application. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler will not complain. Now, this leads us to our next rule:
 
 Passing an `off` toggle method as callback argument will match an `on` toggle in current scope.
 ```typescript
@@ -239,7 +239,7 @@ Notice that we say possible death and not certain death. We will get back to thi
 
 ## Mutiple references
 
-We some times, need to deal with multiple references of the same toggle. Like for instance, when we instantiate multiple objects of the same class. The compiler will not pass the code if there is two toggles that have same name. This is because we want associate one type of allocation/deallocation of resource with one identifier. This will make code more safe.
+We some times, need to deal with multiple references of the same toggle. Like for instance, when we instantiate multiple objects of the same class. The compiler will not pass the code if there is two toggles that have the same name. This is because we want associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
 
 In order to satisfy our compiler we would need to give our toggles some aliases:
 ```typescript
@@ -256,19 +256,26 @@ class SuperView {
         this.subView = new View(this.user); // Turns the toggle on.
 		on UserChangeTitle as UserChangeTitleOnAnotherSubView
         this.anotherSubView = new View(this.user); // Turns the toggle on.
+        
+	    // off UserChangeTitleOnSubView
+	    // off UserChangeTitleOnAnotherSubView
+        this.onDestroy(() => {
+            this.removeSubView();
+            this.removeAnotherSubView();
+        });
     }
 	
 	onDestroy(callback: () => void) {
 		this.deleteButton.addEventListener(callback); 
 	}
 	
-	// on UserChangeTitleOnSubView
+	// off UserChangeTitleOnSubView
 	removeSubView() {
 		off UserChangeTitle as UserChangeTitleOnSubView
         this.subView.removeUser(); // Turns the toggle off.
         this.subView = null;
 	}
-	
+	// off UserChangeTitleOnAnotherSubView
 	removeAnotherSubView() {
 		off UserChangeTitle as UserChangeTitleOnAnotherSubView
         this.anotherSubView.removeUser(); // Turns the toggle off.
