@@ -20,7 +20,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
 Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counted smart pointers. We will try to cover some of these problems and present a solution to these problems.
 
 ## Definition
-A memory leak is objects we intended to delete. But instead of being deleted, they remained on the runtime.
+A memory leak is objects we intended to delete. But instead of being deleted, they remained on runtime.
 
 ## Example
 We extend an EventEmitter class to create a user model:
