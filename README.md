@@ -21,7 +21,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
     * [Toggle Definition](#toggle-definition)
     * [On Toggle Example](#on-toggle-example)
     * [Off Toggle Example](#off-toggle-example)
-    * [False Toggle Example](#false-toggle-example)
+    * [False Add-Sub Method Example](#false-add-sub-method-example)
   * [Heap Object Graph](#heap-object-graph)
 
 # Memory Mistakes
@@ -113,9 +113,9 @@ export class EventEmitter {
 The `eventCallbackStore` above is hashmap of a list of callbacks for each event. We register new events with the `register` method and unregister them with the `unregister` method. We can emit a new event with the `emit` method. The property `eventCallbackStore` is a potential leaking resource storage, because it can hold callbacks on events and a developer might forgot to unregister some of those events when no longer needed. Though the essentials here, is the `register` and `unregister` methods. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `register` always call `unregister`? If possible, we would prevent having any memory leaks. Let us answer this question later, and begin with annotating them first. 
 
 ## Method Annotation
-I propose in this case, the following annotation syntax:
+Lets just the following temporary annotation syntax:
 ```
-[add|sub] NAME
+add|sub NAME
 ```
 The `add` and `sub` is an operator that annotates methods with a name that identifies the resouce being added or subtracted. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and annotate the method with `add` and `sub`.
 ```typescript
@@ -416,27 +416,33 @@ export class EventEmitter {
     public eventCallbackStore: EventCallbackStore = {}
 }
 ```
-Our general concept so far, is that for every method for adding objects, there should exists at least one matching method for subtraction of objects. We can safely say that new assignements will increase the elements count. But also, in the event emitter case, array element additions. With static code analysis we can also make sure that elements are added or subtracted. Before it was upto the developer to manually annotate and implement the method. But nothing stops the developer to implement a method with an `off` toggle which increases the element count.
+Our general concept so far, is that for every method for adding objects, there should exists at least one matching method for subtraction of objects. We can safely say that new assignements will increase the elements count. But also, in the event emitter case, array element additions. With static code analysis we can also make sure that elements are added or subtracted. Before it was upto the developer to manually annotate and implement the method. But nothing stops the developer to implement a method with a sub method which increases the element count.
 
-### Toggle Definition
-For the toggle methods the following holds true:
+### Add-Sub Method Definition
+For the add-sub methods the following holds true:
+```
+Add methods: Adds 0 or more elements .
+Sub methods: Subtracts 0 or more elements.
+```
+And let it be our definitions for our add-sub methods.
 
+We also want to introduce a syntax to annotate a storage:
 ```
-On toogle methods: Adds 0 or more elements .
-Off toggle methods: Subtracts 0 or more elements.
+addsub NAME
 ```
-And let it be our definitions for our toggle methods.
 
 So if we annotate our `eventCallbackStore` with:
 ```typescript
 export class User extends EventEmitter {
-    toggle UserEvent
+    addsub UserEventCallback
     public eventCallbackStore: EventCallbackStore = {}
 }
 ```
 
-### On Toggle Example
-We can staticly analyse the `register` method, which is suppose to be an `on` toggle:
+Notice, also when we now have an annotation for the storage. We don't need to annotate the methods to begin with `add|sub NAME` . Though you still need to alias some call expressions with `add|sub NAME as ALIAS`.
+
+### Add Method Example
+We can staticly analyse the `register` method, which is suppose to be an add method:
 ```typescript
 public register(event: string, callback: Callback) {
     if (!this.eventCallbackStore[event]) {
@@ -457,10 +463,10 @@ And the following `push` method adds one element to the store:
 ```typescript
 this.eventCallbackStore[event].push(callback);
 ```
-So in all, we can safely say that the method adds 0 or more elements to the store `eventCallbackStore`. And it satisfies our `on` toggle definition.
+So in all, we can safely say that the method adds 0 or more elements to the store `eventCallbackStore`. And it satisfies our add method definition above.
 
 
-### Off Toggle Example
+### Sub Method Example
 
 Lets examine our `unregister` method:
 ```typescript
@@ -473,13 +479,13 @@ public unregister(event: string, callback: Callback): void {
     }
 }
 ```
-We can statically confirm that this method subtracts 0 or 1 element from our store(even though it is encapsulated in a for-loop and an if statement block):
+We can statically confirm that this method subtracts 0 or 1 element from our store with the following expression(even though it is encapsulated in a for-loop and an if statement block):
 ```typescript
 this.eventCallbackStore[event].splice(i, 1);
 ```
-So the `unregister` satisfies our `off` toggle definition. 
+So the `unregister` satisfies our sub method definition above. 
 
-### False Toggle Example
+### False Add-Sub Method xample
 
 Lets also examine an false toogle example. Lets take our `emit` method as an example:
 
@@ -492,7 +498,7 @@ public emit(event: string, args: any[]) {
     }
 }
 ```
-There is no expression in above that increases our elements count in our store. There exists index look up such as `this.eventCallbackStore[event]`, though they don't add any elements. So we can safely say that this method does not satisfy any of our toggle definitions.
+There is no expression in above that increases our elements count in our store. There exists index look up such as `this.eventCallbackStore[event]`, though they don't add any elements. So we can safely say that this method does not satisfy any of our add-sub method definitions above.
 
 ### Types of storage
 We only considered a hash map so far. Though any type that can grow the heap can be annotated.
@@ -501,10 +507,10 @@ We only considered a hash map so far. Though any type that can grow the heap can
 
 When we arrived at our final syntax. We discovered that we could annotate a property and let static analysis discover our toggle methods. Let us illustrate what this means:
 
-When we have a memory leak. Essentially what it means is that our heap object graph can grow to an infinite amount of nodes, starting in some node (we use a tree instead of a graph below):
+When we have a memory leak. Essentially what it means is that our heap object graph can grow to an infinite amount of nodes, starting from some node (we use a tree instead of a graph below):
 
 ![Heap object infinity nodes](https://raw.githubusercontent.com/tinganho/a-toggle-modifier-proposal/master/HeapObjectTreeHorizontalInfinity%402x.jpg)
 
-And we want to statically annotate that any consumer of this node needs to call an `add` and `sub` annotated methods:
+And we want to statically annotate that any consumer of this node needs to call an add and sub methods:
 
 ![Heap object infinity with on and off toggles](https://raw.githubusercontent.com/tinganho/a-toggle-modifier-proposal/master/HeapObjectTreeHorizontalOnOff%402x.jpg)
