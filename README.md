@@ -23,7 +23,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
     * [False Toggle Example](#false-toggle-example)
 
 # Memory Mistakes
-Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference countes. We will try to cover some of these problems and present a solution to these problems.
+Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counts. We will try to cover some of these problems and present a solution to these problems.
 
 ## Definition
 A memory leak is objects we intended to delete. But instead of being deleted, they remained on runtime.
@@ -391,7 +391,7 @@ This is because it is very difficult to do that kind of assertion. A compiler ca
 
 ## Control Flow
 ## Final Syntax
-One could ask why not annotating the source of the memory leak directly instead of annotating the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class.
+One could ask why not annotating the source of the memory leak directly instead of annotating the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class:
 
 ```typescript
 export class EventEmitter {
