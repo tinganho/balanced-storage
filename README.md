@@ -431,7 +431,7 @@ We also want to introduce a syntax to annotate a storage:
 addsub NAME
 ```
 
-So if we annotate our `eventCallbackStore` with:
+Lets annotate our `eventCallbackStore`:
 ```typescript
 export class User extends EventEmitter {
     addsub UserEventCallback
@@ -442,7 +442,7 @@ export class User extends EventEmitter {
 Notice, also when we now have an annotation for the storage. We don't need to annotate the methods to begin with `add|sub NAME` . Though you still need to alias some call expressions with `add|sub NAME as ALIAS`.
 
 ### Add Method Example
-We can staticly analyse the `register` method, which is suppose to be an add method:
+Now, we can staticly analyse the `register` method, which is suppose to be an add method:
 ```typescript
 public register(event: string, callback: Callback) {
     if (!this.eventCallbackStore[event]) {
@@ -468,7 +468,7 @@ So in all, we can safely say that the method adds 0 or more elements to the stor
 
 ### Sub Method Example
 
-Lets examine our `unregister` method:
+Now, lets examine our `unregister` method:
 ```typescript
 public unregister(event: string, callback: Callback): void {
     let callbacks = this.eventCallbackStore[event].length;
@@ -479,7 +479,7 @@ public unregister(event: string, callback: Callback): void {
     }
 }
 ```
-We can statically confirm that this method subtracts 0 or 1 element from our store with the following expression(even though it is encapsulated in a for-loop and an if statement block):
+We can statically confirm that this method subtracts 0 or 1 elements from our store with the following expression(even though it is encapsulated in a for-loop and an if statement block):
 ```typescript
 this.eventCallbackStore[event].splice(i, 1);
 ```
@@ -487,7 +487,7 @@ So the `unregister` satisfies our sub method definition above.
 
 ### False Add-Sub Method xample
 
-Lets also examine an false toogle example. Lets take our `emit` method as an example:
+Lets also examine an false add-sub method example. Lets take our `emit` method as an example:
 
 ```typescript
 public emit(event: string, args: any[]) {
