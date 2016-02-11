@@ -126,7 +126,7 @@ The `eventCallbacks` above is hashmap of a list of callbacks for each event. We 
 
 Lets just the add a temporary classification syntax for our methods:
 
-*MethodClassifiction ::* **add** | **sub** *Name* *MethodDeclaration*
+>*MethodClassifiction ::* **add** | **sub** *Name* *MethodDeclaration*
 
 The `add` and `sub` keywords are operators that classify methods with a name that identifies that elements is being added or subtracted when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and classify our methods.
 
@@ -285,7 +285,7 @@ We some times, need to deal with multiple references of the same class of object
 
 In order to satisfy our compiler we would need to give our classifications some aliases. And the syntax for aliasing a classification is:
 
-*AddSubAliasClassification ::* **add** | **sub** *Name* **as** *Alias* *CallExpression*
+>*AddSubAliasClassification ::* **add** | **sub** *Name* **as** *Alias* *CallExpression*
 
 Lets go ahead and these classifications:
 
@@ -474,7 +474,7 @@ And let it be our definitions for our add-sub methods.
 
 We also want to introduce a syntax to annotate a storage:
 
-*AddSubClassification ::* **addsub** *Name* *StorageDeclaration*
+>*AddSubClassification ::* **addsub** *Name* *StorageDeclaration*
 
 Lets annotate our `eventCallbacks`:
 
