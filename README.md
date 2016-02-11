@@ -203,7 +203,7 @@ class View<M> {
 }
 ```
 
-The methods in our class is now balanced. This leads us to our second rule. A class's methods needs to be balanced. A balanced class has two methods of which one of them having an add method and another having a corresponding sub method. And when a class is balanced it implicitly infers that the a balance check should be done in an another scope other than in the current class's methods. This could be inside an another class's method that uses the class's add method.
+The methods in our class is now balanced. This leads us to our second rule. A class's methods needs to be balanced. A balanced class has two methods of which one of them having an add method and another having a corresponding sub method. And when a class is balanced it implicitly infers that the a balance check should be done in an another scope other than in the current class's methods. This could be inside an another class's method that uses the current class's add method.
 
 Now, let use the above class in an another class we call `SuperView`:
 
@@ -218,7 +218,7 @@ class SuperView {
 
 The above code does not pass the compiler check, because there is no matching sub method. Also the code causes a memory leak.
 
-Just adding the call expression `this.subView.removeUser()` below, will match our add method. Now, on the same scope we have a matching add and sub methods. So the compiler will compile the following code. Also, the code, causes no memory leaks:
+We can add the call the expression `this.subView.removeUser()` below, to match our add method. Now, on the same scope we have a matching add and sub methods. So the compiler will compile the following code. Also, the code, causes no memory leaks:
 
 ```typescript
 class SuperView {
