@@ -17,6 +17,10 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Collections](#collections)
   * [Control Flow](#control-flow)
   * [Final Syntax](#final-syntax)
+    * [Toogle Definition](#toogle-definition)
+    * [On Toogle Example](#on-toogle-example)
+    * [Off Toogle Example](#off-toogle-example)
+    * [False Toogle Example](#false-toogle-example)
 
 # Memory Mistakes
 Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference countes. We will try to cover some of these problems and present a solution to these problems.
@@ -394,8 +398,9 @@ export class EventEmitter {
     public eventCallbackStore: EventCallbackStore = {}
 }
 ```
-Our general concept so far, is that for every method for adding objects, there should exists at least one matching method for subtraction of objects. We can safely say that new assignements will increase the element count. But also, in the event emitter case, array element additions. With static code analysis we can also make sure that elements are added or subtracted. Before it was upto the developer to manually annotate and implement the method. But nothing stops the developer to implement a method with an `off` toggle which increases the element count.
+Our general concept so far, is that for every method for adding objects, there should exists at least one matching method for subtraction of objects. We can safely say that new assignements will increase the elements count. But also, in the event emitter case, array element additions. With static code analysis we can also make sure that elements are added or subtracted. Before it was upto the developer to manually annotate and implement the method. But nothing stops the developer to implement a method with an `off` toggle which increases the element count.
 
+### Toggle Definition
 For the toggle methods the following holds true:
 
 ```
@@ -412,6 +417,7 @@ export class User extends EventEmitter {
 }
 ```
 
+### On toggle example
 We can staticly analyse the `register` method, which is suppose to be an `on` toggle:
 ```typescript
 public register(event: string, callback: Callback) {
@@ -435,6 +441,9 @@ this.eventCallbackStore[event].push(callback);
 ```
 So in all, we can safely say that the method adds 0 or more elements to the store `eventCallbackStore`. And it satisfies our `on` toggle definition.
 
+
+### Off toggle example
+
 Lets examine our `unregister` method:
 ```typescript
 public unregister(event: string, callback: Callback): void {
@@ -446,8 +455,25 @@ public unregister(event: string, callback: Callback): void {
     }
 }
 ```
-We can statically confirm that this method subtract 0 or 1 element from our store(even though it is encapsulated in a for-loop and an if statement block):
+We can statically confirm that this method subtracts 0 or 1 element from our store(even though it is encapsulated in a for-loop and an if statement block):
 ```typescript
 this.eventCallbackStore[event].splice(i, 1);
 ```
 So the `unregister` satisfies our `off` toggle definition. 
+
+### False toggle example
+
+Lets also examine an false toogle example. Lets take our `emit` method as an example:
+
+```typescript
+public emit(event: string, args: any[]) {
+    if (this.eventCallbackStore[event]) {
+        for (let callback of this.eventCallbackStore[event]) {
+            callback.apply(null, args);
+        }
+    }
+}
+```
+There is no expression in above that increases our elements count in our store. There exists index look up such as `this.eventCallbackStore[event]`, though they don't add any elements. So we can safely say that this method does not satisfy any of our toggle definitions.
+
+
