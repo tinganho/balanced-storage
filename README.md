@@ -127,7 +127,8 @@ The `eventCallbacks` above is hashmap of a list of callbacks for each event. We 
 Lets just the add a temporary classification syntax for our methods:
 
 ```
-add|sub NAME
+*MethodClassifiction :: add | sub Name*
+*Name :: [a-zA-Z][a-zA-Z0-9]*
 ```
 
 The `add` and `sub` keywords are operators that classify methods with a name that identifies that elements is being added or subtracted when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and classify our methods.
