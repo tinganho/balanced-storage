@@ -10,7 +10,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Defintiion](#definition)
   * [Example](#example) 
 * [Toogle Annotation](#toogle-annotation)
-  * [Syntax](#syntax)
+  * [Method Annotation](#syntax)
   * [Inheritance](#inheritance)
   * [Callbacks](#callbacks)
   * [Multiple References](#multiple-references)
@@ -24,7 +24,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Heap Object Graph](#heap-object-graph)
 
 # Memory Mistakes
-Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counts. We will try to cover some of these problems and present a solution to these problems.
+Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counting. We will try to cover some of these problems and present a solution to these problems.
 
 ## Definition
 A memory leak is objects we intended to delete. But instead of being deleted, they remained on runtime.
@@ -74,11 +74,11 @@ this.user.on('change:title', () => {
 ```
 As the comment says, `this` inside the closure is referencing  the view. So `this.user` is referencing `view`. Because the reference count haven't reached zero, the garbabge collector cannot garbage collect the sub view.
 
-# Toggle Annotation
+# Annotation
 
-We want to prevent the memory leak by static code analysis. But, in doing so we must analyse the source of memory leaks. By definition a memory leak is an unused resource at runtime. We allocate memory and initialize our resource. When the resource is no longer needed we need to deallocate it. In a garbage collected language we can unreference objects so they get garbage collected. And for a manual manage memory programming languages, we must deallocate it manually by writing some sort of expressions. In a majority of cases, if not all, a memory leaked resource often has one or more references to itself. In a garbage collected language this always holds true, they always have at least one reference to itself(otherwise they would be garbage collected). 
+We want to prevent the memory leak by static code analysis. But, in doing so we must analyse the source of memory leaks. By definition a memory leak is an unused resource at runtime. We allocate memory and initialize our resource. When the resource is no longer needed we need to deallocate it. In a garbage collected language we can unreference objects so they get garbage collected. And for a manual managed memory programming languages, we must deallocate it manually by writing some sort of expressions. In a majority of cases, if not all, a memory leaked resource often has one or more references to itself. In a garbage collected language this always holds true, they always have at least one reference to itself(otherwise they would be garbage collected). 
 
-I propose, that methods that uses these references, to be annotated. I have not shown you the `EventEmitter` class yet and lets begin by showing it to you:
+Let us just annotate these methods that uses these references. I have not shown you the `EventEmitter` class yet and lets begin by showing it to you:
 
 ```typescript
 export class EventEmitter {
@@ -109,22 +109,22 @@ export class EventEmitter {
     }
 }
 ```
-The `eventCallbackStore` above is hashmap of a list of callbacks for each event. We register new events with the `on` method and unregister them with the `unregister` method. We can emit a new event with the `emit` method. The property `eventCallbackStore` is a potential leaking resource storage, because it can hold callbacks on events and a developer might forgot to unregister some of those events when no longer needed. Though the essentials here, is the `register` and `unregister` methods. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `register` always call `unregister`? If possible, we would prevent having any memory leaks. Let us answer this question later, and begin with annotating them first. 
+The `eventCallbackStore` above is hashmap of a list of callbacks for each event. We register new events with the `register` method and unregister them with the `unregister` method. We can emit a new event with the `emit` method. The property `eventCallbackStore` is a potential leaking resource storage, because it can hold callbacks on events and a developer might forgot to unregister some of those events when no longer needed. Though the essentials here, is the `register` and `unregister` methods. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `register` always call `unregister`? If possible, we would prevent having any memory leaks. Let us answer this question later, and begin with annotating them first. 
 
-## Syntax
+## Method Annotation
 I propose in this case, the following annotation syntax:
 ```
-[on|off] IDENTIFIER
+[add|sub] IDENTIFIER
 ```
-The `on` and `off` is an operator that annotates methods with an toogle identifier. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and annotate the method with `on` and `off`.
+The `add` and `sub` is an operator that annotates methods with an identifier that identifies the resouce being added or subtracted. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and annotate the method with `add` and `sub`.
 ```typescript
 export class User extends EventEmitter {
-    on UserChangeTitle
+    add UserChangeTitleCallback
     public register(event: string, callback: Callback) {
         super.register.apply(this, arguments);
     }
     
-    off UserChangeTitle
+    sub UserChangeTitleCallback
     public unregister(event: string, callback: Callback): void {
         super.unregister.apply(this, arguments);
     }
@@ -139,9 +139,11 @@ class View<M> {
     }
 }
 ```
-Though, in this case having the method calls on the same scope is not quite useful. Since we unregister the event directly. It would be as good as not calling anything at all. But in order to pass the compiler checks we can also call the `off` toogle in another method. The `off` toogle is the `off` annotated method, in this case the `unregister` method. And vice versa for the `on` toogle.
+Though, in this case having the method calls on the same scope is not quite useful. Since we unregister the event directly. It would be as good as not calling anything at all. But in order to pass the compiler checks we can also call the `sub` method in another method. The `sub` method is the `sub` annotated method, in this case the `unregister` method. And vice versa for the `add` method.
 ```typescript
 class View<M> {
+    private description = 'This is the view of: ';
+    
     constructor(private user: User) {
         this.user.register('change:title', this.showAlert);
     }
@@ -151,95 +153,96 @@ class View<M> {
     }
     
     public showAlert(title: string) {
-        alert(title);
+        alert(this.description + title);
     }
 }
 ```
 ## Inheritance
-Notice first, that whenever there is a scope with an unmatched `on` or `off` toggles. The unmatched toogle annotates the containing method. Here we show the inherited annotation in the comments below:
+Notice first, that whenever there is a scope with an unmatched `add` or `sub` methods. The unmatched methods annotates the containing method. Here we show the inherited annotation in the comments below:
 ```typescript
 class View<M> {
-    // on UserChangeTitle
+    private description = 'This is the view of: ';
+    
+    // add UserChangeTitleCallback
     constructor(private user: User) {
         this.user.register('change:title', this.showAlert);
     }
     
-    // off UserChangeTitle
+    // sub UserChangeTitleCallback
     public removeUser() {
         this.user.unregister('change:title', this.showAlert);
     }
     
     public showAlert(title: string) {
-        alert(title);
+        alert(this.description + title);
     }
 }
 ```
-The methods in our class is now balanced. This leads us to our second rule. A class's method's needs to have balanced toogle annotations. And when a class is balanced it implicitly infers that the a balance check should be done in an another scope other than in the current class's methods. This could be an another class's method that uses this class's `on` toggle.
+The methods in our class is now balanced. This leads us to our second rule. A class's method's needs to have balanced method annotations. And when a class is balanced it implicitly infers that the a balance check should be done in an another scope other than in the current class's methods. This could be an another class's method that uses this class's `add` method.
 
 Now, let use the abve class in a class we call `SuperView`:
 ```typescript
 class SuperView {
     showSubView() {
-        this.subView = new View(this.user); // This call has an on toggle.
+        this.subView = new View(this.user); // This call is an `add` method
         this.subView = null;
     }
 }
 ```
-The above code does not pass the compiler check, because there is no matching `off` toogle. Also the code causes a memory leak.
+The above code does not pass the compiler check, because there is no matching `sub` method. Also the code causes a memory leak.
 
-Just adding the call expression `this.subView.removeUser()` below, will match our `on` toogle. Now, on the same scope we have a matching `on` and `off` toogles. So the compiler will compile the following code. Also, the code, causes no memory leaks:
+Just adding the call expression `this.subView.removeUser()` below, will match our `add` method. Now, on the same scope we have a matching `add` and `sub` methods. So the compiler will compile the following code. Also, the code, causes no memory leaks:
 ```typescript
 class SuperView {
     showSubView() {
-        this.subView = new View(this.user); // On toggle.
-        this.subView.removeUser(); // Off toggle.
+        this.subView = new View(this.user); // Add constructor.
+        this.subView.removeUser(); // Sub method.
         this.subView = null;
     }
 }
 ```
-But if we don't add the toggle `off` expression above. The containing method will be annotated as:
+If we don't add a `sub` method call above. The containing method will be annotated as:
 ```typescript
 class SuperView {
-	// on UserChangeTitle
+	// add UserChangeTitleCallback
     showSubView() {
         this.subView = new View(this.user); // Turns the toggle on.
         this.subView = null;
     }
 }
 ```
-The method `showSubView` inherited the `on` toggle from the expression `new View(this.user)`. This inheritance loop goes on and on.
+The method `showSubView` inherited the `add` annotation from the expression `new View(this.user)`. This inheritance loop goes on and on.
 
 ## Callbacks
 
 We have so far only considered object having an instant death. And this is not so useful for our application. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler will not complain. Now, this leads us to our next rule:
 
-Passing an `off` toggle method as callback argument will match an `on` toggle in current scope.
+Passing a `sub` method method as callback argument will match an `add` method in current scope:
 ```typescript
 class SuperView {
-	// no inferred on toggle
     showSubView() {
-        this.subView = new View(this.user); // On toggle.
-		this.onDestroy(this.removeSubView); // Passing an off toggle callback to a call expression also matches the on toggle above.
+        this.subView = new View(this.user); // Add method.
+		this.onDestroy(this.removeSubView); // Passing a sub method to a call expression matches the add method above.
     }
 	
 	onDestroy(callback: () => void) {
 		this.deleteButton.addEventListener(callback); 
 	}
 	
-	// off UserChangeTitle
+	// sub UserChangeTitleCallback
 	removeSubView() {
-        this.subView.removeUser(); // Turns the toggle off.
+        this.subView.removeUser(); // A sub method
         this.subView = null;
 	}
 }
 ```
-Now, we have ensured a possible death of our `subView`, because `this.removeSubView` has an inhertied `off` toggle:
+Now, we have ensured a possible death of our `subView`, because `this.removeSubView` has an inherited a `sub` annotation:
 ```typescript
-	this.subView = new View(this.user); // On toggle.
-	this.onDestroy(this.removeSubView); // `this.onDestroy` takes a callback. And we passed in a off toggle. Which mean we have a possible death for our `subView`.
+	this.subView = new View(this.user); // Has an 'add' annotation.
+	this.onDestroy(this.removeSubView); // `this.onDestroy` takes a callback. And we passed in a 'sub' annotated method. Which mean we have a possible death for our `subView`.
 ```
 
-The scope is matched and the compiler will not complain. Notice, whenever an `on` toggle is matched with an `off` toggle directly or whenever there is a path(call path) that can be reached, to match an `on` toggle. The code will pass the check. Because in other words, we have ensured a possible death of our allocated resource.
+The scope is matched and the compiler will not complain. Notice, whenever an `add` annotated method is matched with an `sub` annotated method directly or whenever there is a path(call path) that can be reached, to match an `sub` annotated method. The code will pass the check. Because in other words, we have ensured a possible death of our allocated resource.
 ```
 BIRTH ---> DEATH
 BIRTH ?---> CALL1 ?---> CALL2 ?---> CALLN ?---> DEATH
@@ -248,9 +251,9 @@ Notice, that we say a possible death and not a certain death. We will get back t
 
 ## Multiple References
 
-We some times, need to deal with multiple references of the same toggle. Like for instance, when we instantiate multiple objects of the same class. The compiler will not pass the code if there is two toggles that have the same name. This is because we want to associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
+We some times, need to deal with multiple references of the same class of objects. The compiler will not pass the code if there is two annotations that have the same name. This is because we want to associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
 
-In order to satisfy our compiler we would need to give our toggles some aliases:
+In order to satisfy our compiler we would need to give our annotations some aliases:
 ```typescript
 
 import { View } from './view';
@@ -258,19 +261,19 @@ import { View } from './view';
 class SuperView {
 	private subView: View;
 
-	// on UserChangeTitleOnSubView
-	// on UserChangeTitleOnAnotherSubView
+	// add UserChangeTitleEventCallbackOnSubView
+	// add UserChangeTitleEventCallbackOnAnotherSubView
     showSubView() {
-		on UserChangeTitle as UserChangeTitleOnSubView
-        this.subView = new View(this.user); // Turns the toggle on.
-		on UserChangeTitle as UserChangeTitleOnAnotherSubView
-        this.anotherSubView = new View(this.user); // Turns the toggle on.
+		add UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnSubView
+        this.subView = new View(this.user); // 'add' annotated
+		add UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnAnotherSubView
+        this.anotherSubView = new View(this.user); // 'add' annotated
         
-	    // off UserChangeTitleOnSubView
-	    // off UserChangeTitleOnAnotherSubView
+	    // sub UserChangeTitleEventCallbackOnSubView
+	    // sub UserChangeTitleEventCallbackOnAnotherSubView
         this.onDestroy(() => {
-            this.removeSubView();
-            this.removeAnotherSubView();
+            this.removeSubView();  // 'sub' annotated.
+            this.removeAnotherSubView();  // 'sub' annotated.
         });
     }
 	
@@ -278,40 +281,40 @@ class SuperView {
 		this.deleteButton.addEventListener(callback); 
 	}
 	
-	// off UserChangeTitleOnSubView
+	// sub UserChangeTitleEventCallbackOnSubView
 	removeSubView() {
-		off UserChangeTitle as UserChangeTitleOnSubView
-        this.subView.removeUser(); // Turns the toggle off.
+		sub UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnSubView
+        this.subView.removeUser(); // 'sub' annotated.
         this.subView = null;
 	}
-	// off UserChangeTitleOnAnotherSubView
+	// off UserChangeTitleEventCallbackOnAnotherSubView
 	removeAnotherSubView() {
-		off UserChangeTitle as UserChangeTitleOnAnotherSubView
-        this.anotherSubView.removeUser(); // Turns the toggle off.
+		off UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnAnotherSubView
+        this.anotherSubView.removeUser(); // 'sub' annotated.
         this.subView = null;
 	}
 }
 ```
-Notice that the anonymous lambda function will inherit the annotations:
+Notice, that the anonymous lambda function will inherit the annotations:
 ```typescript
-// off UserChangeTitleOnSubView
-// off UserChangeTitleOnAnotherSubView
-() => {
-    this.removeSubView();
-    this.removeAnotherSubView();
-}
+// sub UserChangeTitleEventCallbackOnSubView
+// sub UserChangeTitleEventCallbackOnAnotherSubView
+this.onDestroy(() => {
+    this.removeSubView();  // 'sub' annotated.
+    this.removeAnotherSubView();  // 'sub' annotated.
+});
 ```
-This is due to the fact that the lambda's function's scope does not have matching `on` toggles. But also the since `this.onDestroy` is a method which accept callbacks, it will balance the both on toggles:
+This is due to the fact that the lambda's function's scope does not have matching `add` and `sub` annotations. Also, since `this.onDestroy` is a method which accept callbacks, it will balance the containing scope:
 ```typescript
-on UserChangeTitle as UserChangeTitleOnSubView
-this.subView = new View(this.user); // Turns the toggle on.
-on UserChangeTitle as UserChangeTitleOnAnotherSubView
-this.anotherSubView = new View(this.user); // Turns the toggle on.
+add UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnSubView
+this.subView = new View(this.user); // 'add' annotated
+add UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnAnotherSubView
+this.anotherSubView = new View(this.user); // 'add' annotated
 ```
 So in other words, The above code will compile. It also causes no memory leaks.
 
 ### Collections
-When dealing with collection, it is good practice to have already balanced toggles on constructors or methods.
+When dealing with collection, it is good practice to have already balanced annotations on constructors or methods.
 ```typescript
 import { View } from './view';
 
@@ -324,17 +327,17 @@ class SuperView {
     }
 }
 ```
-Because we don't need to deal with an even more complex matching of toggles.
+Because we don't need to deal with an even more complex matching of annotations.
 
-For various reason, if one cannot use unbalanced methods. The toggle conventions works as before. Even on a for loop below:
+For various reason, if one cannot use unbalanced methods. The annotation conventions works as before. Even on a for loop below:
 ```typescript
 class SuperView {
 	private subViews: View[] = [];
 	
-	// on UserChangeTitle
+	// add UserChangeTitleEventCallback
     showSubViews() {
 		for (let i = 0; i < 10; i++) {
-		    on UserChangeTitle as UserChangeTitles
+		    add UserChangeTitleEventCallback as UserChangeTitleEventCallbacks
         	this.subView.push(new View(this.user));
 		}
     }
@@ -345,39 +348,40 @@ As before, we would need to have a matching off toggle annotated method to satis
 class SuperView {
 	private subViews: View[] = [];
 	
-	// off UserChangeTitles
+	// sub UserChangeTitleEventCallbacks
 	removeSubViews() {
 		for (let i = 0; i < 10; i++) {
-			off UserChangeTitle as UserChangeTitles
+		    sub UserChangeTitleEventCallback as UserChangeTitleEventCallbacks
         	this.subView[i].removeUser();
 		}
 		this.subView = [];
     }
 }
 ```
-Now our whole class will look like this:
+Now, our whole class will look like this:
 ```typescript
 class SuperView {
     private subViews: View[] = [];
-
+    
+	// add UserChangeTitleEventCallback
     showSubViews() {
-        for (let i = 0; i < 10; i++) {
-            on UserChangelTitle as UserChangeTitles
-            this.subViews.push(new View(this.user));
-        }
-        this.onDestroy(this.removeSubViews);
+		for (let i = 0; i < 10; i++) {
+		    add UserChangeTitleEventCallback as UserChangeTitleEventCallbacks
+        	this.subView.push(new View(this.user));
+		}
     }
 
     onDestroy(callback: () => void) {
         this.deleteAllButton.addEventListener(callback); 
     }
 
-    removeSubViews() {
-        for (let i = 0; i < 10; i++) {
-            off UserChangeTitle as UserChangeTitles
-            this.subViews[i].removeUser();
-        }
-        this.subView = [];
+	// sub UserChangeTitleEventCallbacks
+	removeSubViews() {
+		for (let i = 0; i < 10; i++) {
+		    sub UserChangeTitleEventCallback as UserChangeTitleEventCallbacks
+        	this.subView[i].removeUser();
+		}
+		this.subView = [];
     }
 }
 ```
