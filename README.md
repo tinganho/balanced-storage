@@ -17,8 +17,9 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Collections](#collections)
     * [Unsafe Add-Sub Collection Methods](#unsafe-add-sub-collection-methods)
   * [Control Flow](#control-flow)
-  * [Annotation Syntax](#annotation-syntax)
+  * [Storage Annotation](#storage-annotation)
     * [Add-Sub Method Definition](#add-sub-method-definition)
+    * [Add-Sub Storage Annotation Syntax](#add-sub-storage-annotation-syntax)
     * [Add Method Example](#add-method-example)
     * [Off Toggle Example](#sub-method-example)
     * [False Add-Sub Method Example](#false-add-sub-method-example)
@@ -449,7 +450,7 @@ This is because it is very difficult to do that kind of assertion. A compiler ca
 
 ## Control Flow
 
-## Annotation Syntax
+## Storage Annotation
 
 One could ask why not annotating the source of the memory leak directly instead of classifying the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class:
 
@@ -459,7 +460,7 @@ export class EventEmitter {
 }
 ```
 
-Our general concept so far, is that for every method for adding objects, there should exists at least one matching method for subtraction of objects. We can safely say that new assignements will increase the elements count. But also, in the event emitter case, array element additions. With static code analysis we can also make sure that elements are added or subtracted. Before it was upto the developer to manually annotate and implement the method. But nothing stops the developer to implement a method with a sub method which increases the element count.
+Our general concept so far, is that for every method for addition of objects, there should exists at least one matching method for subtraction of objects. We can safely say that new assignements will increase the elements count. But also, in the event emitter case, array element additions. With static code analysis we can also make sure that elements are added or subtracted. Before it was upto the developer to manually annotate and implement the method. But nothing stops the developer to implement a method with a sub method which increases the element count.
 
 ### Add-Sub Method Definition
 
@@ -471,6 +472,8 @@ Sub methods: Subtracts 0 or more elements.
 ```
 
 And let it be our definitions for our add-sub methods.
+
+### Add-Sub Storage Annotation Syntax
 
 We also want to introduce a syntax to annotate a storage:
 
