@@ -15,6 +15,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Callbacks](#callbacks)
   * [Multiple References](#multiple-references)
   * [Collections](#collections)
+    * [Unsafe add-sub collection methods](#unsafe-add-sub-collection-methods)
   * [Control Flow](#control-flow)
   * [Final Syntax](#final-syntax)
     * [Toggle Definition](#toggle-definition)
@@ -74,7 +75,7 @@ this.user.on('change:title', () => {
 ```
 As the comment says, `this` inside the closure is referencing  the view. So `this.user` is referencing `view`. Because the reference count haven't reached zero, the garbabge collector cannot garbage collect the sub view.
 
-# Annotation
+# Add-Sub Annotations
 
 We want to prevent the memory leak by static code analysis. But, in doing so we must analyse the source of memory leaks. By definition a memory leak is an unused resource at runtime. We allocate memory and initialize our resource. When the resource is no longer needed we need to deallocate it. In a garbage collected language we can unreference objects so they get garbage collected. And for a manual managed memory programming languages, we must deallocate it manually by writing some sort of expressions. In a majority of cases, if not all, a memory leaked resource often has one or more references to itself. In a garbage collected language this always holds true, they always have at least one reference to itself(otherwise they would be garbage collected). 
 
@@ -114,9 +115,9 @@ The `eventCallbackStore` above is hashmap of a list of callbacks for each event.
 ## Method Annotation
 I propose in this case, the following annotation syntax:
 ```
-[add|sub] IDENTIFIER
+[add|sub] NAME
 ```
-The `add` and `sub` is an operator that annotates methods with an identifier that identifies the resouce being added or subtracted. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and annotate the method with `add` and `sub`.
+The `add` and `sub` is an operator that annotates methods with a name that identifies the resouce being added or subtracted. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and annotate the method with `add` and `sub`.
 ```typescript
 export class User extends EventEmitter {
     add UserChangeTitleCallback
@@ -130,7 +131,8 @@ export class User extends EventEmitter {
     }
 }
 ```
-Now, every consumer of these two methods will have some additional checks that they need to pass. First, if they are in the same scope they need to call `register` before `unregister`. 
+Now, every consumer of these two methods will have some additional checks that they need to pass. First, if they are in the same scope they need to call `register` before `unregister`. Or in other words an `add` annotated method needs to be called before a `sub` annotated method. And through this document we would refer an `add` annotated method as an add method. And a sub annotated method as a sub method.
+
 ```typescript
 class View<M> {
     constructor(private user: User) {
@@ -139,7 +141,8 @@ class View<M> {
     }
 }
 ```
-Though, in this case having the method calls on the same scope is not quite useful. Since we unregister the event directly. It would be as good as not calling anything at all. But in order to pass the compiler checks we can also call the `sub` method in another method. The `sub` method is the `sub` annotated method, in this case the `unregister` method. And vice versa for the `add` method.
+Though, in this case having the method calls on the same scope is not quite useful. Since we unregister the event directly. It would be as good as not calling anything at all. But in order to pass the compiler checks we can also call a sub method in another method.
+
 ```typescript
 class View<M> {
     private description = 'This is the view of: ';
@@ -157,8 +160,10 @@ class View<M> {
     }
 }
 ```
+In the above example. We call `this.user.unregister('change:title', this.showAlert);` to pass the compiler check.
+
 ## Inheritance
-Notice first, that whenever there is a scope with an unmatched `add` or `sub` methods. The unmatched methods annotates the containing method. Here we show the inherited annotation in the comments below:
+Notice first, that whenever there is a scope with an unmatched add or sub methods. The unmatched methods annotates the containing method. Here we show the inherited annotation in the comments below:
 ```typescript
 class View<M> {
     private description = 'This is the view of: ';
@@ -178,20 +183,20 @@ class View<M> {
     }
 }
 ```
-The methods in our class is now balanced. This leads us to our second rule. A class's method's needs to have balanced method annotations. And when a class is balanced it implicitly infers that the a balance check should be done in an another scope other than in the current class's methods. This could be an another class's method that uses this class's `add` method.
+The methods in our class is now balanced. This leads us to our second rule. A class's method's needs to have balanced method annotations. A balanced annotation is two methods of which one of them having an add method and another having a corresponding sub method. And when a class is balanced it implicitly infers that the a balance check should be done in an another scope other than in the current class's methods. This could be an another class's method that uses the class's add method.
 
 Now, let use the abve class in a class we call `SuperView`:
 ```typescript
 class SuperView {
     showSubView() {
-        this.subView = new View(this.user); // This call is an `add` method
+        this.subView = new View(this.user); // This call is an add method
         this.subView = null;
     }
 }
 ```
-The above code does not pass the compiler check, because there is no matching `sub` method. Also the code causes a memory leak.
+The above code does not pass the compiler check, because there is no matching sub method. Also the code causes a memory leak.
 
-Just adding the call expression `this.subView.removeUser()` below, will match our `add` method. Now, on the same scope we have a matching `add` and `sub` methods. So the compiler will compile the following code. Also, the code, causes no memory leaks:
+Just adding the call expression `this.subView.removeUser()` below, will match our add annotated method. Now, on the same scope we have a matching add and sub methods. So the compiler will compile the following code. Also, the code, causes no memory leaks:
 ```typescript
 class SuperView {
     showSubView() {
@@ -201,7 +206,7 @@ class SuperView {
     }
 }
 ```
-If we don't add a `sub` method call above. The containing method will be annotated as:
+If we don't add a sub method call above. The containing method will be annotated as an add method:
 ```typescript
 class SuperView {
 	// add UserChangeTitleCallback
@@ -215,9 +220,9 @@ The method `showSubView` inherited the `add` annotation from the expression `new
 
 ## Callbacks
 
-We have so far only considered object having an instant death. And this is not so useful for our application. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler will not complain. Now, this leads us to our next rule:
+We have so far only considered object having an instant death. And this is not so useful. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler checks will pass. Now, this leads us to our next rule:
 
-Passing a `sub` method method as callback argument will match an `add` method in current scope:
+Passing a sub method method as a callback argument will balance an add method in current scope:
 ```typescript
 class SuperView {
     showSubView() {
@@ -231,7 +236,7 @@ class SuperView {
 	
 	// sub UserChangeTitleCallback
 	removeSubView() {
-        this.subView.removeUser(); // A sub method
+        this.subView.removeUser(); // Sub method.
         this.subView = null;
 	}
 }
@@ -242,7 +247,7 @@ Now, we have ensured a possible death of our `subView`, because `this.removeSubV
 	this.onDestroy(this.removeSubView); // `this.onDestroy` takes a callback. And we passed in a 'sub' annotated method. Which mean we have a possible death for our `subView`.
 ```
 
-The scope is matched and the compiler will not complain. Notice, whenever an `add` annotated method is matched with an `sub` annotated method directly or whenever there is a path(call path) that can be reached, to match an `sub` annotated method. The code will pass the check. Because in other words, we have ensured a possible death of our allocated resource.
+The scope is balanced and the compiler will not complain. Notice, whenever an add method is matched with an sub method directly or whenever there is a path(call path) that can be reached, to match an sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
 ```
 BIRTH ---> DEATH
 BIRTH ?---> CALL1 ?---> CALL2 ?---> CALLN ?---> DEATH
@@ -253,7 +258,11 @@ Notice, that we say a possible death and not a certain death. We will get back t
 
 We some times, need to deal with multiple references of the same class of objects. The compiler will not pass the code if there is two annotations that have the same name. This is because we want to associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
 
-In order to satisfy our compiler we would need to give our annotations some aliases:
+In order to satisfy our compiler we would need to give our annotations some aliases. And the syntax for aliasing an annotation is:
+```
+[add|sub] NAME as ALIAS
+```
+Lets go ahead and these annotations:
 ```typescript
 
 import { View } from './view';
@@ -265,15 +274,15 @@ class SuperView {
 	// add UserChangeTitleEventCallbackOnAnotherSubView
     showSubView() {
 		add UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnSubView
-        this.subView = new View(this.user); // 'add' annotated
+        this.subView = new View(this.user); // Add method.
 		add UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnAnotherSubView
-        this.anotherSubView = new View(this.user); // 'add' annotated
+        this.anotherSubView = new View(this.user); // Add method.
         
 	    // sub UserChangeTitleEventCallbackOnSubView
 	    // sub UserChangeTitleEventCallbackOnAnotherSubView
         this.onDestroy(() => {
-            this.removeSubView();  // 'sub' annotated.
-            this.removeAnotherSubView();  // 'sub' annotated.
+            this.removeSubView();  // Sub method.
+            this.removeAnotherSubView();  // Sub method.
         });
     }
 	
@@ -284,13 +293,13 @@ class SuperView {
 	// sub UserChangeTitleEventCallbackOnSubView
 	removeSubView() {
 		sub UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnSubView
-        this.subView.removeUser(); // 'sub' annotated.
+        this.subView.removeUser(); // Sub method.
         this.subView = null;
 	}
 	// off UserChangeTitleEventCallbackOnAnotherSubView
 	removeAnotherSubView() {
 		off UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnAnotherSubView
-        this.anotherSubView.removeUser(); // 'sub' annotated.
+        this.anotherSubView.removeUser(); // Sub method.
         this.subView = null;
 	}
 }
@@ -300,11 +309,11 @@ Notice, that the anonymous lambda function will inherit the annotations:
 // sub UserChangeTitleEventCallbackOnSubView
 // sub UserChangeTitleEventCallbackOnAnotherSubView
 this.onDestroy(() => {
-    this.removeSubView();  // 'sub' annotated.
-    this.removeAnotherSubView();  // 'sub' annotated.
+    this.removeSubView();  // Sub method.
+    this.removeAnotherSubView();  // Sub method.
 });
 ```
-This is due to the fact that the lambda's function's scope does not have matching `add` and `sub` annotations. Also, since `this.onDestroy` is a method which accept callbacks, it will balance the containing scope:
+This is due to the fact that the lambda's function's scope does not have matching add method calls for the current sub method calls. Also, since `this.onDestroy` is a method which accept callbacks, it will balance the containing scope:
 ```typescript
 add UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnSubView
 this.subView = new View(this.user); // 'add' annotated
@@ -314,7 +323,7 @@ this.anotherSubView = new View(this.user); // 'add' annotated
 So in other words, The above code will compile. It also causes no memory leaks.
 
 ### Collections
-When dealing with collection, it is good practice to have already balanced annotations on constructors or methods.
+When dealing with collection, it is good practice to have already balanced method calls on constructors or methods.
 ```typescript
 import { View } from './view';
 
@@ -329,7 +338,7 @@ class SuperView {
 ```
 Because we don't need to deal with an even more complex matching of annotations.
 
-For various reason, if one cannot use unbalanced methods. The annotation conventions works as before. Even on a for loop below:
+For various reason, if one cannot use balanced methods/constructors. The annotation conventions works as before. An unmatched add or sub method calls annotates the containing method. Even on a for loop below:
 ```typescript
 class SuperView {
 	private subViews: View[] = [];
@@ -343,7 +352,7 @@ class SuperView {
     }
 }
 ```
-As before, we would need to have a matching off toggle annotated method to satisfy our compiler:
+As before, we would need to have a matching sub method to satisfy our compiler:
 ```typescript
 class SuperView {
 	private subViews: View[] = [];
@@ -358,6 +367,8 @@ class SuperView {
     }
 }
 ```
+In the above example, `this.subView[i].removeUser();` is a sub method and since there are no add method that balances it. It annotates the containing method `removeSubViews`.
+
 Now, our whole class will look like this:
 ```typescript
 class SuperView {
@@ -385,6 +396,8 @@ class SuperView {
     }
 }
 ```
+
+### Unsafe Add-Sub Collection Methods
 Note, there is no compile error, even though the for loop in `removeSubViews` is not matched with `showSubView`. Like for instance, if we would have only looped 9 loops instead of 10:
 ```typescript
 for (let i = 0; i < 9; i++) {// Loop only 9 elements and not 10 causes another memory leak.
@@ -492,6 +505,6 @@ When we have a memory leak. Essentially what it means is that our heap object gr
 
 ![Heap object infinity nodes](https://raw.githubusercontent.com/tinganho/a-toggle-modifier-proposal/master/HeapObjectTreeHorizontalInfinity%402x.jpg)
 
-And we want to statically annotate that any consumer of this node needs to call an `on` and `off` toggle method:
+And we want to statically annotate that any consumer of this node needs to call an `add` and `sub` annotated methods:
 
 ![Heap object infinity with on and off toggles](https://raw.githubusercontent.com/tinganho/a-toggle-modifier-proposal/master/HeapObjectTreeHorizontalOnOff%402x.jpg)
