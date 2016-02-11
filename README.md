@@ -17,7 +17,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Collections](#collections)
     * [Unsafe Add-Sub Collection Methods](#unsafe-add-sub-collection-methods)
   * [Control Flow](#control-flow)
-  * [Final Syntax](#final-syntax)
+  * [Annotation Syntax](#annotation-syntax)
     * [Add-Sub Method Definition](#add-sub-method-definition)
     * [Add Method Example](#add-method-example)
     * [Off Toggle Example](#sub-method-example)
@@ -25,12 +25,14 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Heap Object Graph](#heap-object-graph)
 
 # Memory Leaks
+
 Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counting. We will try to cover some of these problems and present a solution to these problems.
 
 ## Definition
 A memory leak is objects we intended to delete. But instead of being deleted, they remained on runtime.
 
 ## Example
+
 We extend an EventEmitter class to create a user model:
 
 ```typescript
@@ -120,14 +122,15 @@ export class EventEmitter {
 
 The `eventCallbacks` above is hashmap of a list of callbacks for each event. We register new events with the `register` method and unregister them with the `unregister` method. We can emit a new event with the `emit` method. The property `eventCallbacks` is a potential leaking resource storage, because it can hold callbacks on events and a developer might forgot to unregister some of those events when no longer needed. Though the essentials here, is the `register` and `unregister` methods. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `register` always call `unregister`? If possible, we would prevent having any memory leaks. Let us answer this question later, and begin with annotating them first. 
 
-## Method Annotation
-Lets just the add a temporary annotation syntax for our methods:
+## Method Classification
+
+Lets just the add a temporary classification syntax for our methods:
 
 ```
 add|sub NAME
 ```
 
-The `add` and `sub` is an operator that annotates methods with a name that identifies that an element or resource is being added or subtracted when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and annotate the method with `add` and `sub` methods.
+The `add` and `sub` keywords are operators that classify methods with a name that identifies that elements is being added or subtracted when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and classify our methods.
 
 ```typescript
 export class User extends EventEmitter {
@@ -143,7 +146,7 @@ export class User extends EventEmitter {
 }
 ```
 
-Now, every consumer of these two methods will have some additional checks that they need to pass. First, if they are in the same scope they need to call `register` before `unregister`. Or in other words an `add` annotated method needs to be called before a `sub` annotated method. And through this document we would refer an `add` annotated method as an add method. And a sub annotated method as a sub method.
+Now, every consumer of these two methods will have some additional checks that they need to pass. First, if they are in the same scope they need to call `register` before `unregister`. Or in other words an `add` classified method needs to be called before a `sub` classified method. And through out this document we would refer an `add` classified method as an add method. And a sub classified method as a sub method.
 
 ```typescript
 class View<M> {
@@ -177,7 +180,8 @@ class View<M> {
 In the above example. We call `this.user.unregister('change:title', this.showAlert);` to pass the compiler check.
 
 ## Inheritance
-Notice first, that whenever there is a scope with an unmatched add or sub methods. The unmatched methods annotates the containing method. Here we show the inherited annotation in the comments below:
+
+Notice first, that whenever there is a scope with an unmatched add or sub methods. The unmatched methods classifies the containing method. Here we show the inherited classification in the comments below:
 
 ```typescript
 class View<M> {
@@ -199,9 +203,9 @@ class View<M> {
 }
 ```
 
-The methods in our class is now balanced. This leads us to our second rule. A class's method's needs to have balanced method annotations. A balanced annotation is two methods of which one of them having an add method and another having a corresponding sub method. And when a class is balanced it implicitly infers that the a balance check should be done in an another scope other than in the current class's methods. This could be an another class's method that uses the class's add method.
+The methods in our class is now balanced. This leads us to our second rule. A class's methods needs to be balanced. A balanced class has two methods of which one of them having an add method and another having a corresponding sub method. And when a class is balanced it implicitly infers that the a balance check should be done in an another scope other than in the current class's methods. This could be inside an another class's method that uses the class's add method.
 
-Now, let use the abve class in a class we call `SuperView`:
+Now, let use the above class in an another class we call `SuperView`:
 
 ```typescript
 class SuperView {
@@ -214,7 +218,7 @@ class SuperView {
 
 The above code does not pass the compiler check, because there is no matching sub method. Also the code causes a memory leak.
 
-Just adding the call expression `this.subView.removeUser()` below, will match our add annotated method. Now, on the same scope we have a matching add and sub methods. So the compiler will compile the following code. Also, the code, causes no memory leaks:
+Just adding the call expression `this.subView.removeUser()` below, will match our add method. Now, on the same scope we have a matching add and sub methods. So the compiler will compile the following code. Also, the code, causes no memory leaks:
 
 ```typescript
 class SuperView {
@@ -238,7 +242,7 @@ class SuperView {
 }
 ```
 
-The method `showSubView` inherited the `add` annotation from the expression `new View(this.user)`. This inheritance loop goes on and on.
+The method `showSubView` inherited the `add` classification from the expression `new View(this.user)`. This inheritance loop goes on and on.
 
 ## Callbacks
 
@@ -264,13 +268,13 @@ class SuperView {
 	}
 }
 ```
-Now, we have ensured a possible death of our `subView`, because `this.removeSubView` has an inherited a `sub` annotation:
+Now, we have ensured a possible death of our `subView`, because `this.removeSubView` has an inherited a `sub` classification:
 ```typescript
-	this.subView = new View(this.user); // Has an 'add' annotation.
-	this.onDestroy(this.removeSubView); // `this.onDestroy` takes a callback. And we passed in a 'sub' annotated method. Which mean we have a possible death for our `subView`.
+	this.subView = new View(this.user); // Add method.
+	this.onDestroy(this.removeSubView); // `this.onDestroy` takes a callback. And we passed in a sub method. Which mean we have a possible death for our `subView`.
 ```
 
-The scope is balanced and the compiler will not complain. Notice, whenever an add method is matched with an sub method directly or whenever there is a path(call path) that can be reached, to match an sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
+The scope is balanced and the compiler will not complain. Notice, whenever an add method is matched with an sub method directly or whenever there is a path(call path) that can be reached, to match a sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
 ```
 BIRTH ---> DEATH
 BIRTH ?---> CALL1 ?---> CALL2 ?---> CALLN ?---> DEATH
@@ -279,13 +283,13 @@ Notice, that we say a possible death and not a certain death. We will get back t
 
 ## Multiple References
 
-We some times, need to deal with multiple references of the same class of objects. The compiler will not pass the code if there is two annotations that have the same name. This is because we want to associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
+We some times, need to deal with multiple references of the same class of objects. The compiler will not pass the code if there is two classifications that have the same name. This is because we want to associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
 
-In order to satisfy our compiler we would need to give our annotations some aliases. And the syntax for aliasing an annotation is:
+In order to satisfy our compiler we would need to give our classifications some aliases. And the syntax for aliasing a classification is:
 ```
 add|sub NAME as ALIAS
 ```
-Lets go ahead and these annotations:
+Lets go ahead and these classifications:
 ```typescript
 
 import { View } from './view';
@@ -328,7 +332,7 @@ class SuperView {
 }
 ```
 
-Notice, that the anonymous lambda function will inherit the annotations:
+Notice, that the anonymous lambda function will inherit the classifications:
 
 ```typescript
 // sub UserChangeTitleCallbackOnSubView
@@ -351,6 +355,7 @@ this.anotherSubView = new View(this.user); // Add method.
 So in other words, The above code will compile. It also causes no memory leaks.
 
 ### Collections
+
 When dealing with collection, it is good practice to have already balanced method calls on constructors or methods.
 
 ```typescript
@@ -368,7 +373,7 @@ class SuperView {
 
 Because we don't need to deal with an even more complex matching of add-sub methods.
 
-For various reason, if one cannot use balanced methods/constructors. The annotation conventions works as before. An unmatched add or sub method call annotates the containing method. Even on a for loop below:
+For various reason, if one cannot use balanced methods/constructors. The classifications conventions works as before. An unmatched add or sub method call annotates the containing method. Even on a for loop below:
 
 ```typescript
 class SuperView {
@@ -432,6 +437,7 @@ class SuperView {
 ```
 
 ### Unsafe Add-Sub Collection Methods
+
 Note, there is no compile error, even though the for loop in `removeSubViews` is not matched with `showSubView`. Like for instance, if we would have only looped 9 loops instead of 10:
 
 ```typescript
@@ -444,8 +450,10 @@ for (let i = 0; i < 9; i++) {// Loop only 9 elements and not 10 causes another m
 This is because it is very difficult to do that kind of assertion. A compiler cannot know the business logic of your application and thus cannot make that assertion. Though, we match the symbol of `UserChangeTitleCallbacks` and that alone gives us some safety.
 
 ## Control Flow
-## Final Syntax
-One could ask why not annotating the source of the memory leak directly instead of annotating the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class:
+
+## Annotation Syntax
+
+One could ask why not annotating the source of the memory leak directly instead of classifying the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class:
 
 ```typescript
 export class EventEmitter {
@@ -456,6 +464,7 @@ export class EventEmitter {
 Our general concept so far, is that for every method for adding objects, there should exists at least one matching method for subtraction of objects. We can safely say that new assignements will increase the elements count. But also, in the event emitter case, array element additions. With static code analysis we can also make sure that elements are added or subtracted. Before it was upto the developer to manually annotate and implement the method. But nothing stops the developer to implement a method with a sub method which increases the element count.
 
 ### Add-Sub Method Definition
+
 For the add-sub methods the following holds true:
 
 ```
@@ -471,7 +480,7 @@ We also want to introduce a syntax to annotate a storage:
 addsub NAME
 ```
 
-Lets annotate our `eventCallbackStore`:
+Lets annotate our `eventCallbacks`:
 
 ```typescript
 export class User extends EventEmitter {
@@ -480,7 +489,7 @@ export class User extends EventEmitter {
 }
 ```
 
-Notice, also when we now have an annotation for the storage. We don't need to annotate methods with `add|sub NAME` anymore. Though you still need to alias some call expressions with `add|sub NAME as ALIAS`.
+Notice, also when we now have an annotation for the storage. We don't need to classify methods with `add|sub NAME` anymore. Though, you still need to alias some call expressions with `add|sub NAME as ALIAS` to prevent name collisions.
 
 ### Add Method Example
 
@@ -511,7 +520,7 @@ And the following `push` method adds one element to the store:
 this.eventCallbackStore[event].push(callback);
 ```
 
-So in all, we can safely say that the method adds 0 or more elements to the store `eventCallbackStore`. And it satisfies our add method definition above.
+So in all, we can safely say that the method adds 0 or more elements to the store `eventCallbacks`. And it satisfies our add method definition above.
 
 ### Sub Method Example
 
@@ -519,10 +528,10 @@ Now, lets examine our `unregister` method:
 
 ```typescript
 public unregister(event: string, callback: Callback): void {
-    let callbacks = this.eventCallbackStore[event].length;
+    let callbacks = this.eventCallbacks[event].length;
     for (let i = 0;i < callback.length; i++) {
-        if (this.eventCallbackStore[event][i] === callback) {
-            this.eventCallbackStore[event].splice(i, 1);
+        if (this.eventCallbacks[event][i] === callback) {
+            this.eventCallbacks[event].splice(i, 1);
         }
     }
 }
@@ -531,7 +540,7 @@ public unregister(event: string, callback: Callback): void {
 We can statically confirm that this method subtracts 0 or 1 elements from our store with the following expression(even though it is encapsulated in a for-loop and an if statement block):
 
 ```typescript
-this.eventCallbackStore[event].splice(i, 1);
+this.eventCallbacks[event].splice(i, 1);
 ```
 
 So the `unregister` satisfies our sub method definition above. 
@@ -553,6 +562,7 @@ public emit(event: string, args: any[]) {
 There is no expression in above that increases our elements count in our store. There exists index look up such as `this.eventCallbackStore[event]`, though they don't add any elements. So we can safely say that this method does not satisfy any of our add-sub method definitions above.
 
 ### Types of storage
+
 We only considered a hash map so far. Though any type that can grow the heap can be annotated.
 
 ## Heap Object Graph
