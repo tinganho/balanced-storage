@@ -484,5 +484,5 @@ We only considered a hash map so far. Though any type that can grow the heap can
 
 When we arrived at our final syntax. We discovered that we could annotate a property and let static analysis discover our toggle methods. Let us illustrate what this means:
 
-![Heap object infinity nodes](https://github.com/tinganho/a-toggle-modifier-proposal/HeapObjectTreeHorizontalInfinity@2x.jpg)
-![Heap object infinity with on and off toggles](https://github.com/tinganho/a-toggle-modifier-proposal/HeapObjectTreeHorizontalOnOff@2x.jpg)
+![Heap object infinity nodes](https://raw.githubusercontent.com/tinganho/a-toggle-modifier-proposal/master/HeapObjectTreeHorizontalInfinity%402x.jpg)
+![Heap object infinity with on and off toggles](https://raw.githubusercontent.com/tinganho/a-toggle-modifier-proposal/master/HeapObjectTreeHorizontalOnOff%402x.jpg)
