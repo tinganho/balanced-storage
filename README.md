@@ -10,7 +10,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Definition](#definition)
   * [Example](#example) 
 * [Add-Sub Method Classification](#add-sub-method-classification)
-  * [Method Classification](#syntax)
+  * [Method Classification](#method-classification)
   * [Inheritance](#inheritance)
   * [Callbacks](#callbacks)
   * [Multiple References](#multiple-references)
