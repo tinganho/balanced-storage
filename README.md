@@ -238,7 +238,7 @@ The scope is matched and the compiler will not complain. Notice whenever `on` to
 BIRTH ---> DEATH
 BIRTH ?---> CALL1 ?---> CALL2 ?---> CALLN ?---> DEATH
 ```
-Notice that we say possible death and not certain death. We will get back to this later.
+Notice, that we say possible death and not certain death. We will get back to this later.
 
 ## Multiple References
 
