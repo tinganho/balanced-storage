@@ -16,9 +16,10 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Multiple References](#multiple-references)
   * [Collections](#collections)
   * [Control Flow](#control-flow)
+  * [Final Syntax](#final-syntax)
 
 # Memory Mistakes
-Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counted smart pointers. We will try to cover some of these problems and present a solution to these problems.
+Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference countes. We will try to cover some of these problems and present a solution to these problems.
 
 ## Definition
 A memory leak is objects we intended to delete. But instead of being deleted, they remained on runtime.
@@ -385,4 +386,68 @@ for (let i = 0; i < 9; i++) {// Loop only 9 elements and not 10 causes another m
 This is because it is very difficult to do that kind of assertion. A compiler cannot know the business logic of your application and thus cannot make that assertion. Though, we match the symbol of `UserChangeTitles` and that alone gives us some safety.
 
 ## Control Flow
+## Final Syntax
+One could ask why not annotating the source of the memory leak directly instead of annotating the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class.
 
+```typescript
+export class EventEmitter {
+    public eventCallbackStore: EventCallbackStore = {}
+}
+```
+Our general concept so far, is that for every method for adding objects, there should exists at least one matching method for subtraction of objects. We can safely say that new assignements will increase the element count. But also, in the event emitter case, array element additions. With static code analysis we can also make sure that elements are added or subtracted. Before it was upto the developer to manually annotate and implement the method. But nothing stops the developer to implement a method with an `off` toggle which increases the element count.
+
+For the toggle methods the following holds true:
+
+```
+On toogle methods: Adds 0 or more elements .
+Off toggle methods: Subtracts 0 or more elements.
+```
+And let it be our definitions for our toggle methods.
+
+So if we annotate our `eventCallbackStore` with:
+```typescript
+export class User extends EventEmitter {
+    toggle UserEvent
+    public eventCallbackStore: EventCallbackStore = {}
+}
+```
+
+We can staticly analyse the `register` method, which is suppose to be an `on` toggle:
+```typescript
+public register(event: string, callback: Callback) {
+    if (!this.eventCallbackStore[event]) {
+        this.eventCallbackStore[event] = []; 
+    }
+    this.eventCallbackStore[event].push(callback);
+}
+```
+There is two expressions above that adds elements to the store:
+```typescript
+if (!this.eventCallbackStore[event]) {
+    this.eventCallbackStore[event] = [];
+}
+```
+An assignment adds 0 or 1 new elements to the store.
+
+And the following `push` method adds one element to the store:
+```typescript
+this.eventCallbackStore[event].push(callback);
+```
+So in all, we can safely say that the method adds 0 or more elements to the store `eventCallbackStore`. And it satisfies our `on` toggle definition.
+
+Lets examine our `unregister` method:
+```typescript
+public unregister(event: string, callback: Callback): void {
+    let callbacks = this.eventCallbackStore[event].length;
+    for (let i = 0;i < callback.length; i++) {
+        if (this.eventCallbackStore[event][i] === callback) {
+            this.eventCallbackStore[event].splice(i, 1);
+        }
+    }
+}
+```
+We can statically confirm that this method subtract 0 or 1 element from our store(even though it is encapsulated in a for-loop and an if statement block):
+```typescript
+this.eventCallbackStore[event].splice(i, 1);
+```
+So the `unregister` satisfies our `off` toggle definition. 
