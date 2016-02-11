@@ -83,41 +83,41 @@ Let us just annotate these methods that uses these references. I have not shown 
 
 ```typescript
 export class EventEmitter {
-    public eventCallbackStore: EventCallbackStore = {}
+    public eventCallbacks: EventCallbacks = {}
 
     public register(event: string, callback: Callback) {
-        if (!this.eventCallbackStore[event]) {
-            this.eventCallbackStore[event] = [];
+        if (!this.eventCallbacks[event]) {
+            this.eventCallbacks[event] = [];
         }
-        this.eventCallbackStore[event].push(callback);
+        this.eventCallbacks[event].push(callback);
     }
 
     public unregister(event: string, callback: Callback): void {
-        let callbacks = this.eventCallbackStore[event].length;
+        let callbacks = this.eventCallbacks[event].length;
         for (let i = 0;i < callback.length; i++) {
-            if (this.eventCallbackStore[event][i] === callback) {
-                this.eventCallbackStore[event].splice(i, 1);
+            if (this.eventCallbacks[event][i] === callback) {
+                this.eventCallbacks[event].splice(i, 1);
             }
         }
     }
 
     public emit(event: string, args: any[]) {
-        if (this.eventCallbackStore[event]) {
-            for (let callback of this.eventCallbackStore[event]) {
+        if (this.eventCallbacks[event]) {
+            for (let callback of this.eventCallbacks[event]) {
                 callback.apply(null, args);
             }
         }
     }
 }
 ```
-The `eventCallbackStore` above is hashmap of a list of callbacks for each event. We register new events with the `register` method and unregister them with the `unregister` method. We can emit a new event with the `emit` method. The property `eventCallbackStore` is a potential leaking resource storage, because it can hold callbacks on events and a developer might forgot to unregister some of those events when no longer needed. Though the essentials here, is the `register` and `unregister` methods. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `register` always call `unregister`? If possible, we would prevent having any memory leaks. Let us answer this question later, and begin with annotating them first. 
+The `eventCallbacks` above is hashmap of a list of callbacks for each event. We register new events with the `register` method and unregister them with the `unregister` method. We can emit a new event with the `emit` method. The property `eventCallbacks` is a potential leaking resource storage, because it can hold callbacks on events and a developer might forgot to unregister some of those events when no longer needed. Though the essentials here, is the `register` and `unregister` methods. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `register` always call `unregister`? If possible, we would prevent having any memory leaks. Let us answer this question later, and begin with annotating them first. 
 
 ## Method Annotation
-Lets just the following temporary annotation syntax:
+Lets just the add a temporary annotation syntax for our methods:
 ```
 add|sub NAME
 ```
-The `add` and `sub` is an operator that annotates methods with a name that identifies the resouce being added or subtracted. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and annotate the method with `add` and `sub`.
+The `add` and `sub` is an operator that annotates methods with a name that identifies that an element or resource is being added or subtracted when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and annotate the method with `add` and `sub` methods.
 ```typescript
 export class User extends EventEmitter {
     add UserChangeTitleCallback
@@ -260,7 +260,7 @@ We some times, need to deal with multiple references of the same class of object
 
 In order to satisfy our compiler we would need to give our annotations some aliases. And the syntax for aliasing an annotation is:
 ```
-[add|sub] NAME as ALIAS
+add|sub NAME as ALIAS
 ```
 Lets go ahead and these annotations:
 ```typescript
@@ -270,16 +270,16 @@ import { View } from './view';
 class SuperView {
 	private subView: View;
 
-	// add UserChangeTitleEventCallbackOnSubView
-	// add UserChangeTitleEventCallbackOnAnotherSubView
+	// add UserChangeTitleCallbackOnSubView
+	// add UserChangeTitleCallbackOnAnotherSubView
     showSubView() {
-		add UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnSubView
+		add UserChangeTitleCallback as UserChangeTitleCallbackOnSubView
         this.subView = new View(this.user); // Add method.
-		add UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnAnotherSubView
+		add UserChangeTitleEventCallback as UserChangeTitleCallbackOnAnotherSubView
         this.anotherSubView = new View(this.user); // Add method.
         
-	    // sub UserChangeTitleEventCallbackOnSubView
-	    // sub UserChangeTitleEventCallbackOnAnotherSubView
+	    // sub UserChangeTitleCallbackOnSubView
+	    // sub UserChangeTitleCallbackOnAnotherSubView
         this.onDestroy(() => {
             this.removeSubView();  // Sub method.
             this.removeAnotherSubView();  // Sub method.
@@ -290,15 +290,15 @@ class SuperView {
 		this.deleteButton.addEventListener(callback); 
 	}
 	
-	// sub UserChangeTitleEventCallbackOnSubView
+	// sub UserChangeTitleCallbackOnSubView
 	removeSubView() {
-		sub UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnSubView
+		sub UserChangeTitleCallback as UserChangeTitleCallbackOnSubView
         this.subView.removeUser(); // Sub method.
         this.subView = null;
 	}
-	// off UserChangeTitleEventCallbackOnAnotherSubView
+	// off UserChangeTitleCallbackOnAnotherSubView
 	removeAnotherSubView() {
-		off UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnAnotherSubView
+		off UserChangeTitleCallback as UserChangeTitleCallbackOnAnotherSubView
         this.anotherSubView.removeUser(); // Sub method.
         this.subView = null;
 	}
@@ -306,19 +306,19 @@ class SuperView {
 ```
 Notice, that the anonymous lambda function will inherit the annotations:
 ```typescript
-// sub UserChangeTitleEventCallbackOnSubView
-// sub UserChangeTitleEventCallbackOnAnotherSubView
+// sub UserChangeTitleCallbackOnSubView
+// sub UserChangeTitleCallbackOnAnotherSubView
 this.onDestroy(() => {
     this.removeSubView();  // Sub method.
     this.removeAnotherSubView();  // Sub method.
 });
 ```
-This is due to the fact that the lambda's function's scope does not have matching add method calls for the current sub method calls. Also, since `this.onDestroy` is a method which accept callbacks, it will balance the containing scope:
+This is due to the fact that the lambda's function's scope does not have matching add method calls for the current sub method calls. Also, since `this.onDestroy` is a method which accept callbacks, and it will balance the containing scope:
 ```typescript
-add UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnSubView
-this.subView = new View(this.user); // 'add' annotated
-add UserChangeTitleEventCallback as UserChangeTitleEventCallbackOnAnotherSubView
-this.anotherSubView = new View(this.user); // 'add' annotated
+add UserChangeTitleCallback as UserChangeTitleCallbackOnSubView
+this.subView = new View(this.user); // Add method.
+add UserChangeTitleCallback as UserChangeTitleCallbackOnAnotherSubView
+this.anotherSubView = new View(this.user); // Add method.
 ```
 So in other words, The above code will compile. It also causes no memory leaks.
 
@@ -343,10 +343,10 @@ For various reason, if one cannot use balanced methods/constructors. The annotat
 class SuperView {
 	private subViews: View[] = [];
 	
-	// add UserChangeTitleEventCallback
+	// add UserChangeTitleCallback
     showSubViews() {
 		for (let i = 0; i < 10; i++) {
-		    add UserChangeTitleEventCallback as UserChangeTitleEventCallbacks
+		    add UserChangeTitleCallback as UserChangeTitleCallbacks
         	this.subView.push(new View(this.user));
 		}
     }
@@ -357,10 +357,10 @@ As before, we would need to have a matching sub method to satisfy our compiler:
 class SuperView {
 	private subViews: View[] = [];
 	
-	// sub UserChangeTitleEventCallbacks
+	// sub UserChangeTitleCallbacks
 	removeSubViews() {
 		for (let i = 0; i < 10; i++) {
-		    sub UserChangeTitleEventCallback as UserChangeTitleEventCallbacks
+		    sub UserChangeTitleCallback as UserChangeTitleCallbacks
         	this.subView[i].removeUser();
 		}
 		this.subView = [];
@@ -374,10 +374,10 @@ Now, our whole class will look like this:
 class SuperView {
     private subViews: View[] = [];
     
-	// add UserChangeTitleEventCallback
+	// add UserChangeTitleCallback
     showSubViews() {
 		for (let i = 0; i < 10; i++) {
-		    add UserChangeTitleEventCallback as UserChangeTitleEventCallbacks
+		    add UserChangeTitleCallback as UserChangeTitleCallbacks
         	this.subView.push(new View(this.user));
 		}
     }
@@ -386,10 +386,10 @@ class SuperView {
         this.deleteAllButton.addEventListener(callback); 
     }
 
-	// sub UserChangeTitleEventCallbacks
+	// sub UserChangeTitleCallbacks
 	removeSubViews() {
 		for (let i = 0; i < 10; i++) {
-		    sub UserChangeTitleEventCallback as UserChangeTitleEventCallbacks
+		    sub UserChangeTitleCallback as UserChangeTitleCallbacks
         	this.subView[i].removeUser();
 		}
 		this.subView = [];
@@ -401,11 +401,11 @@ class SuperView {
 Note, there is no compile error, even though the for loop in `removeSubViews` is not matched with `showSubView`. Like for instance, if we would have only looped 9 loops instead of 10:
 ```typescript
 for (let i = 0; i < 9; i++) {// Loop only 9 elements and not 10 causes another memory leak.
-	off UserChangeTitle[] as UserChangeTitles
+	off UserChangeTitleCallback as UserChangeTitleCallbacks
 	this.subView[i].removeUser();
 }
 ```
-This is because it is very difficult to do that kind of assertion. A compiler cannot know the business logic of your application and thus cannot make that assertion. Though, we match the symbol of `UserChangeTitles` and that alone gives us some safety.
+This is because it is very difficult to do that kind of assertion. A compiler cannot know the business logic of your application and thus cannot make that assertion. Though, we match the symbol of `UserChangeTitleCallbacks` and that alone gives us some safety.
 
 ## Control Flow
 ## Final Syntax
@@ -439,7 +439,7 @@ export class User extends EventEmitter {
 }
 ```
 
-Notice, also when we now have an annotation for the storage. We don't need to annotate the methods to begin with `add|sub NAME` . Though you still need to alias some call expressions with `add|sub NAME as ALIAS`.
+Notice, also when we now have an annotation for the storage. We don't need to annotate methods with `add|sub NAME` anymore. Though you still need to alias some call expressions with `add|sub NAME as ALIAS`.
 
 ### Add Method Example
 Now, we can staticly analyse the `register` method, which is suppose to be an add method:
