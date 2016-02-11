@@ -474,7 +474,7 @@ And let it be our definitions for our add-sub methods.
 
 We also want to introduce a syntax to annotate a storage:
 
-*AddSubClassification ::* **addsub** *Name* *PropertyMemberDeclaration*
+*AddSubClassification ::* **addsub** *Name* *StorageDeclaration*
 
 Lets annotate our `eventCallbacks`:
 
