@@ -17,10 +17,10 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Collections](#collections)
   * [Control Flow](#control-flow)
   * [Final Syntax](#final-syntax)
-    * [Toogle Definition](#toogle-definition)
-    * [On Toogle Example](#on-toogle-example)
-    * [Off Toogle Example](#off-toogle-example)
-    * [False Toogle Example](#false-toogle-example)
+    * [Toggle Definition](#toggle-definition)
+    * [On Toggle Example](#on-toggle-example)
+    * [Off Toggle Example](#off-toggle-example)
+    * [False Toggle Example](#false-toggle-example)
 
 # Memory Mistakes
 Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference countes. We will try to cover some of these problems and present a solution to these problems.
@@ -417,7 +417,7 @@ export class User extends EventEmitter {
 }
 ```
 
-### On toggle example
+### On Toggle Example
 We can staticly analyse the `register` method, which is suppose to be an `on` toggle:
 ```typescript
 public register(event: string, callback: Callback) {
@@ -442,7 +442,7 @@ this.eventCallbackStore[event].push(callback);
 So in all, we can safely say that the method adds 0 or more elements to the store `eventCallbackStore`. And it satisfies our `on` toggle definition.
 
 
-### Off toggle example
+### Off Toggle Example
 
 Lets examine our `unregister` method:
 ```typescript
@@ -461,7 +461,7 @@ this.eventCallbackStore[event].splice(i, 1);
 ```
 So the `unregister` satisfies our `off` toggle definition. 
 
-### False toggle example
+### False Toggle Example
 
 Lets also examine an false toogle example. Lets take our `emit` method as an example:
 
