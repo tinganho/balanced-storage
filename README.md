@@ -9,7 +9,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
 * [Memory Leaks](#memory-leaks)
   * [Defintiion](#definition)
   * [Example](#example) 
-* [Toogle Annotation](#toogle-annotation)
+* [Add-Sub Annotation](#toogle-annotation)
   * [Method Annotation](#syntax)
   * [Inheritance](#inheritance)
   * [Callbacks](#callbacks)
