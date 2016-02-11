@@ -126,10 +126,7 @@ The `eventCallbacks` above is hashmap of a list of callbacks for each event. We 
 
 Lets just the add a temporary classification syntax for our methods:
 
-```
-*MethodClassifiction :: add | sub Name*
-*Name :: [a-zA-Z][a-zA-Z0-9]*
-```
+*MethodClassifiction ::* **add** | **sub** *Name* *MethodDeclaration*
 
 The `add` and `sub` keywords are operators that classify methods with a name that identifies that elements is being added or subtracted when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and classify our methods.
 
@@ -477,9 +474,7 @@ And let it be our definitions for our add-sub methods.
 
 We also want to introduce a syntax to annotate a storage:
 
-```
-addsub NAME
-```
+*AddSubClassification ::* **addsub** *Name* *PropertyMemberDeclaration*
 
 Lets annotate our `eventCallbacks`:
 
@@ -498,18 +493,18 @@ Now, we can staticly analyse the `register` method, which is suppose to be an ad
 
 ```typescript
 public register(event: string, callback: Callback) {
-    if (!this.eventCallbackStore[event]) {
-        this.eventCallbackStore[event] = []; 
+    if (!this.eventCallbacks[event]) {
+        this.eventCallbacks[event] = []; 
     }
-    this.eventCallbackStore[event].push(callback);
+    this.eventCallbacks[event].push(callback);
 }
 ```
 
 There is two expressions above that adds elements to the store:
 
 ```typescript
-if (!this.eventCallbackStore[event]) {
-    this.eventCallbackStore[event] = [];
+if (!this.eventCallbacks[event]) {
+    this.eventCallbacks[event] = [];
 }
 ```
 
@@ -518,7 +513,7 @@ An assignment adds 0 or 1 new elements to the store.
 And the following `push` method adds one element to the store:
 
 ```typescript
-this.eventCallbackStore[event].push(callback);
+this.eventCallbacks[event].push(callback);
 ```
 
 So in all, we can safely say that the method adds 0 or more elements to the store `eventCallbacks`. And it satisfies our add method definition above.
