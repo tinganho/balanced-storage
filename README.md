@@ -546,7 +546,7 @@ So the `unregister` satisfies our sub method definition above.
 
 ### False Add-Sub Method xample
 
-Lets also examine an false add-sub method example. Lets take our `emit` method as an example:
+Lets also examine a false add-sub method example. Lets take our `emit` method as an example:
 
 ```typescript
 public emit(event: string, args: any[]) {
