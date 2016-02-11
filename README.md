@@ -480,9 +480,14 @@ There is no expression in above that increases our elements count in our store. 
 ### Types of storage
 We only considered a hash map so far. Though any type that can grow the heap can be annotated.
 
-## Heap Object Tree
+## Heap Object Graph
 
 When we arrived at our final syntax. We discovered that we could annotate a property and let static analysis discover our toggle methods. Let us illustrate what this means:
 
+When we have a memory leak. Essentially what it means is that our heap object graph can grow to an infinite amount of nodes, starting in some node (we use a tree instead of a graph below):
+
 ![Heap object infinity nodes](https://raw.githubusercontent.com/tinganho/a-toggle-modifier-proposal/master/HeapObjectTreeHorizontalInfinity%402x.jpg)
+
+And we want to statically annotate that any consumer of this node needs to call an `on` and `off` toggle method:
+
 ![Heap object infinity with on and off toggles](https://raw.githubusercontent.com/tinganho/a-toggle-modifier-proposal/master/HeapObjectTreeHorizontalOnOff%402x.jpg)
