@@ -8,7 +8,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
 * [Abstract](#abstract)
 * [Memory Leaks](#memory-leaks)
   * [Defintiion](#definition)
-  * [Event Emitter Example](#event-emitter-example) 
+  * [Example](#example) 
 * [Toogle Annotation](#toogle-annotation)
   * [Syntax](#syntax)
   * [Inheritance](#inheritance)
