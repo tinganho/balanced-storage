@@ -21,7 +21,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
     * [On Toggle Example](#on-toggle-example)
     * [Off Toggle Example](#off-toggle-example)
     * [False Toggle Example](#false-toggle-example)
-  * [Heap Object Tree](#heap-object-tree)
+  * [Heap Object Graph](#heap-object-graph)
 
 # Memory Mistakes
 Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counts. We will try to cover some of these problems and present a solution to these problems.
