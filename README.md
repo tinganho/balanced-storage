@@ -82,7 +82,7 @@ this.user.on('change:title', () => {
 
 As the comment says, `this` inside the closure is referencing  the view. So `this.user` is referencing `view`. Because the reference count haven't reached zero, the garbabge collector cannot garbage collect the sub view.
 
-# Add-Sub Annotations
+# Add-Sub Method Classification
 
 We want to prevent the memory leak by static code analysis. But, in doing so we must analyse the source of memory leaks. By definition a memory leak is an unused resource at runtime. We allocate memory and initialize our resource. When the resource is no longer needed we need to deallocate it. In a garbage collected language we can unreference objects so they get garbage collected. And for a manual managed memory programming languages, we must deallocate it manually by writing some sort of expressions. In a majority of cases, if not all, a memory leaked resource often has one or more references to itself. In a garbage collected language this always holds true, they always have at least one reference to itself(otherwise they would be garbage collected). 
 
@@ -366,9 +366,9 @@ class SuperView {
 }
 ```
 
-Because we don't need to deal with an even more complex matching of annotations.
+Because we don't need to deal with an even more complex matching of add-sub methods.
 
-For various reason, if one cannot use balanced methods/constructors. The annotation conventions works as before. An unmatched add or sub method calls annotates the containing method. Even on a for loop below:
+For various reason, if one cannot use balanced methods/constructors. The annotation conventions works as before. An unmatched add or sub method call annotates the containing method. Even on a for loop below:
 
 ```typescript
 class SuperView {
@@ -449,7 +449,7 @@ One could ask why not annotating the source of the memory leak directly instead 
 
 ```typescript
 export class EventEmitter {
-    public eventCallbackStore: EventCallbackStore = {}
+    public eventCallbacks: EventCallbacks = {}
 }
 ```
 
@@ -476,7 +476,7 @@ Lets annotate our `eventCallbackStore`:
 ```typescript
 export class User extends EventEmitter {
     addsub UserEventCallback
-    public eventCallbackStore: EventCallbackStore = {}
+    public eventCallbacks: EventCallbacks = {}
 }
 ```
 
