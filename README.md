@@ -284,12 +284,12 @@ Notice, that we say a possible death and not a certain death. We will get back t
 We some times, need to deal with multiple references of the same class of objects. The compiler will not pass the code if there is two classifications that have the same name. This is because we want to associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
 
 In order to satisfy our compiler we would need to give our classifications some aliases. And the syntax for aliasing a classification is:
-```
-add|sub NAME as ALIAS
-```
-Lets go ahead and these classifications:
-```typescript
 
+*AddSubAliasClassification ::* **add** | **sub** *Name* **as** *Alias* *CallExpression*
+
+Lets go ahead and these classifications:
+
+```typescript
 import { View } from './view';
 
 class SuperView {
