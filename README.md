@@ -21,6 +21,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
     * [On Toggle Example](#on-toggle-example)
     * [Off Toggle Example](#off-toggle-example)
     * [False Toggle Example](#false-toggle-example)
+  * [Heap Object Tree](#heap-object-tree)
 
 # Memory Mistakes
 Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counts. We will try to cover some of these problems and present a solution to these problems.
@@ -238,12 +239,12 @@ Now, we have ensured a possible death of our `subView`, because `this.removeSubV
 	this.onDestroy(this.removeSubView); // `this.onDestroy` takes a callback. And we passed in a off toggle. Which mean we have a possible death for our `subView`.
 ```
 
-The scope is matched and the compiler will not complain. Notice whenever `on` toggle is matched with an `off` toggle directly or whenever there is a path(call path) that can be reached, to match an `on` toggle. The code will pass the check. Because in other words, we have ensured a possible death of our allocated resource.
+The scope is matched and the compiler will not complain. Notice, whenever an `on` toggle is matched with an `off` toggle directly or whenever there is a path(call path) that can be reached, to match an `on` toggle. The code will pass the check. Because in other words, we have ensured a possible death of our allocated resource.
 ```
 BIRTH ---> DEATH
 BIRTH ?---> CALL1 ?---> CALL2 ?---> CALLN ?---> DEATH
 ```
-Notice, that we say possible death and not certain death. We will get back to this later.
+Notice, that we say a possible death and not a certain death. We will get back to this later.
 
 ## Multiple References
 
@@ -475,5 +476,12 @@ public emit(event: string, args: any[]) {
 }
 ```
 There is no expression in above that increases our elements count in our store. There exists index look up such as `this.eventCallbackStore[event]`, though they don't add any elements. So we can safely say that this method does not satisfy any of our toggle definitions.
+
+### Types of storage
+We only considered a hash map so far. Though any type that can grow the heap can be annotated.
+
+## Heap Object Tree
+
+When we arrived at our final syntax. We discovered that we could annotate a property and let static analysis discover our toggle methods. Let us illustrate what this means:
 
 
