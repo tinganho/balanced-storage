@@ -13,7 +13,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Method Classification](#method-classification)
   * [Inheritance](#inheritance)
   * [Call Paths](#call-paths)
-  * [Multiple References](#multiple-references)
+  * [Aliasing](#aliasing)
   * [Control Flow](#control-flow)
   * [Balanced Storage Annotation](#balanced-storage-annotation)
     * [Add-Sub Method Definition](#add-sub-method-definition)
@@ -284,7 +284,7 @@ onDestroy(callback: () => void) {
 
 We cannot guarantee that the callback is being called. It is upto the end-user to click the delete button. Though we can guarantee that a call path has a path that at the end calls a method that either adds or subtracts an element in a balanced storage.
 
-## Multiple References
+## Aliasing
 
 We some times, need to deal with multiple references of the same class of objects. The compiler will not pass the code if there is two classifications that have the same name. This is because we want to associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
 
