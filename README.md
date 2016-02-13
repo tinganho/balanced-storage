@@ -273,7 +273,7 @@ Now, we have ensured a possible death of our `subView`, because `this.removeSubV
 	this.onDestroy(this.removeSubView); // `this.onDestroy` takes a callback. And we passed in a sub method. Which mean we have a possible death for our `subView`.
 ```
 
-The scope is balanced and the compiler will not complain. Notice, whenever an add method is matched with an sub method directly or whenever there is a path(call path) that can be reached, to match a sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
+The scope is balanced and the compiler will not complain. Notice, whenever an add method is matched with a sub method directly or whenever there is a path(call path) that can be reached, to match a sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
 ```
 BIRTH ---> DEATH
 BIRTH ?---> CALL1 ?---> CALL2 ?---> CALLN ?---> DEATH
@@ -288,7 +288,7 @@ In order to satisfy our compiler we would need to give our classifications some 
 
 >*AddSubAliasClassification ::* **add** | **sub** *Name* **as** *Alias* *CallExpression*
 
-Lets go ahead and these classifications:
+Lets go ahead and add these classifications:
 
 ```typescript
 import { View } from './view';
@@ -353,104 +353,9 @@ this.anotherSubView = new View(this.user); // Add method.
 
 So in other words, The above code will compile. It also causes no memory leaks.
 
-### Collections
-
-When dealing with collection, it is good practice to have already balanced method calls on constructors or methods.
-
-```typescript
-import { View } from './view';
-
-class SuperView {
-	private subViews: View[] = [];
-    showSubViews() {
-		for (let i = 0; i < 10; i++) {
-        	this.subViews.push(new View(this.user)); // The constructor is already balanced. So the compiler will not complain.
-		}
-    }
-}
-```
-
-Because we don't need to deal with an even more complex matching of add-sub methods.
-
-For various reason, if one cannot use balanced methods/constructors. The classifications conventions works as before. An unmatched add or sub method call annotates the containing method. Even on a for loop below:
-
-```typescript
-class SuperView {
-	private subViews: View[] = [];
-	
-	// add UserChangeTitleCallback
-    showSubViews() {
-		for (let i = 0; i < 10; i++) {
-		    add UserChangeTitleCallback as UserChangeTitleCallbacks
-        	this.subView.push(new View(this.user));
-		}
-    }
-}
-```
-As before, we would need to have a matching sub method to satisfy our compiler:
-
-```typescript
-class SuperView {
-	private subViews: View[] = [];
-	
-	// sub UserChangeTitleCallbacks
-	removeSubViews() {
-		for (let i = 0; i < 10; i++) {
-		    sub UserChangeTitleCallback as UserChangeTitleCallbacks
-        	this.subView[i].removeUser();
-		}
-		this.subView = [];
-    }
-}
-```
-
-In the above example, `this.subView[i].removeUser();` is a sub method and since there are no add method that balances it. It annotates the containing method `removeSubViews`.
-
-Now, our whole class will look like this:
-
-```typescript
-class SuperView {
-    private subViews: View[] = [];
-    
-	// add UserChangeTitleCallback
-    showSubViews() {
-		for (let i = 0; i < 10; i++) {
-		    add UserChangeTitleCallback as UserChangeTitleCallbacks
-        	this.subView.push(new View(this.user));
-		}
-    }
-
-    onDestroy(callback: () => void) {
-        this.deleteAllButton.addEventListener(callback); 
-    }
-
-	// sub UserChangeTitleCallbacks
-	removeSubViews() {
-		for (let i = 0; i < 10; i++) {
-		    sub UserChangeTitleCallback as UserChangeTitleCallbacks
-        	this.subView[i].removeUser();
-		}
-		this.subView = [];
-    }
-}
-```
-
-### Unsafe Add-Sub Collection Methods
-
-Note, there is no compile error, even though the for loop in `removeSubViews` is not matched with `showSubView`. Like for instance, if we would have only looped 9 loops instead of 10:
-
-```typescript
-for (let i = 0; i < 9; i++) {// Loop only 9 elements and not 10 causes another memory leak.
-	off UserChangeTitleCallback as UserChangeTitleCallbacks
-	this.subView[i].removeUser();
-}
-```
-
-This is because it is very difficult to do that kind of assertion. A compiler cannot know the business logic of your application and thus cannot make that assertion. Though, we match the symbol of `UserChangeTitleCallbacks` and that alone gives us some safety.
-
 ## Control Flow
 
-## Storage Annotation
+## Balanced Storage Annotation
 
 One could ask why not annotating the source of the memory leak directly instead of classifying the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class:
 
@@ -467,23 +372,22 @@ Our general concept so far, is that for every method for addition of objects, th
 For the add-sub methods the following holds true:
 
 ```
-Add methods: Adds 0 or more elements .
-Sub methods: Subtracts 0 or more elements.
+Add methods: Adds 1 elements.
+Sub methods: Subtracts the added element.
 ```
-
-And let it be our definitions for our add-sub methods.
+And let it be our definitions for our add-sub methods for our case. It is upto a programming language implementor to decide the range.
 
 ### Add-Sub Storage Annotation Syntax
 
-We also want to introduce a syntax to annotate a storage:
+We also want to introduce a new syntax to annotate a storage:
 
->*AddSubClassification ::* **addsub** *Name* *StorageDeclaration*
+>*AddSubClassification ::* **balance** *Name* *StorageDeclaration*
 
-Lets annotate our `eventCallbacks`:
+Lets annotate our `eventCallbacks` store:
 
 ```typescript
 export class User extends EventEmitter {
-    addsub UserEventCallback
+    balance UserEventCallback
     public eventCallbacks: EventCallbacks = {}
 }
 ```
@@ -503,7 +407,7 @@ public register(event: string, callback: Callback) {
 }
 ```
 
-There is two expressions above that adds elements to the store:
+Lets check out our if statement and body:
 
 ```typescript
 if (!this.eventCallbacks[event]) {
@@ -511,15 +415,15 @@ if (!this.eventCallbacks[event]) {
 }
 ```
 
-An assignment adds 0 or 1 new elements to the store.
+An assignment adds 0 or 1 new elements to the store. Though we have only specified that an index element of `this.eventCallbacks[event]` are storage elements. So the above code does not add anything to store.
 
-And the following `push` method adds one element to the store:
+In comparison, the following expression adds one element to the store:
 
 ```typescript
 this.eventCallbacks[event].push(callback);
 ```
 
-So in all, we can safely say that the method adds 0 or more elements to the store `eventCallbacks`. And it satisfies our add method definition above.
+So in all, we can safely say that the method adds 1 element to the store `eventCallbacks` each time the method is called. And it satisfies our add method definition above.
 
 ### Sub Method Example
 
@@ -528,7 +432,7 @@ Now, lets examine our `unregister` method:
 ```typescript
 public unregister(event: string, callback: Callback): void {
     let callbacks = this.eventCallbacks[event].length;
-    for (let i = 0;i < callback.length; i++) {
+    for (let i = 0; i < callback.length; i++) {
         if (this.eventCallbacks[event][i] === callback) {
             this.eventCallbacks[event].splice(i, 1);
         }
@@ -541,12 +445,52 @@ We can statically confirm that this method subtracts 0 or 1 elements from our st
 ```typescript
 this.eventCallbacks[event].splice(i, 1);
 ```
+Please also notice that the add methods adds 1 element and the sub method subtracts 0 or 1 element. So logically there still could be a potential memory leak. Though, our method above has a for loop that loops through all elements and a check for an element existens before a subtraction of element occur. This is crucial for balancing our storage:
 
-So the `unregister` satisfies our sub method definition above. 
+```ts
+for (let i = 0; i < callback.length; i++) {
+    if (this.eventCallbacks[event][i] === callback) {
+        this.eventCallbacks[event].splice(i, 1);
+    }
+}
+```
+
+So, in order to have a balance, we must know that whatever was passed on our add method. Would be passed in our sub method. Lets examine our `View` once again. 
+
+```ts
+class View<M> {
+    private description = 'This is the view of: ';
+
+    // add UserChangeTitleCallback
+    constructor(private user: User) {
+        this.user.register('change:title', this.showAlert);
+    }
+
+    // sub UserChangeTitleCallback
+    public removeUser() {
+        this.user.unregister('change:title', this.showAlert);
+    }
+
+    public showAlert(title: string) {
+        alert(this.description + title);
+    }
+}
+```
+
+We can see that whatever was passed in our add method:
+
+```ts
+this.user.register('change:title', this.showAlert);
+```
+The same arguments was passed to our sub method:
+```ts
+this.user.unregister('change:title', this.showAlert);
+```
+So we got balance.
 
 ### False Add-Sub Method xample
 
-Lets also examine a false add-sub method example. Lets take our `emit` method as an example:
+Lets also examine an false add-sub method example. Lets take our `emit` method as an example:
 
 ```typescript
 public emit(event: string, args: any[]) {
