@@ -242,7 +242,7 @@ class SuperView {
 
 The method `showSubView` inherited the `add` classification from the expression `new View(this.user)`. This inheritance loop goes on and on.
 
-## Call paths
+## Call Paths
 
 We have so far only considered object having an instant death. And this is not so useful. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler checks will pass. Now, this leads us to our next rule:
 
