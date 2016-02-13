@@ -298,21 +298,22 @@ Lets go ahead and add these classifications:
 import { View } from './view';
 
 class SubView {
-	private subView: View;
+	private view: View;
+	private anotherView: View;
 
-	// add UserChangeTitleCallbackOnSubView
-	// add UserChangeTitleCallbackOnAnotherSubView
+	// add UserChangeTitleCallbackOnView
+	// add UserChangeTitleCallbackOnAnotherView
     show() {
-		add UserChangeTitleCallback as UserChangeTitleCallbackOnSubView
-        this.subView = new View(this.user); // Add method.
-		add UserChangeTitleEventCallback as UserChangeTitleCallbackOnAnotherSubView
-        this.anotherSubView = new View(this.user); // Add method.
+		add UserChangeTitleCallback as UserChangeTitleCallbackOnView
+        this.view = new View(this.user); // Add method.
+		add UserChangeTitleEventCallback as UserChangeTitleCallbackOnAnotherView
+        this.anotherView = new View(this.user); // Add method.
         
-	    // sub UserChangeTitleCallbackOnSubView
+	    // sub UserChangeTitleCallbackOnView
 	    // sub UserChangeTitleCallbackOnAnotherSubView
         this.onDestroy(() => {
-            this.removeSubView();  // Sub method.
-            this.removeAnotherSubView();  // Sub method.
+            this.removeView();  // Sub method.
+            this.removeAnotherView();  // Sub method.
         });
     }
 	
@@ -320,16 +321,16 @@ class SubView {
 		this.deleteButton.addEventListener(callback); 
 	}
 	
-	// sub UserChangeTitleCallbackOnSubView
-	remove() {
-		sub UserChangeTitleCallback as UserChangeTitleCallbackOnSubView
-        this.subView.removeUser(); // Sub method.
-        this.subView = null;
+	// sub UserChangeTitleCallbackOnView
+	removeView() {
+		sub UserChangeTitleCallback as UserChangeTitleCallbackOnView
+        this.view.removeUser(); // Sub method.
+        this.view = null;
 	}
-	// off UserChangeTitleCallbackOnAnotherSubView
-	removeAnotherSubView() {
-		off UserChangeTitleCallback as UserChangeTitleCallbackOnAnotherSubView
-        this.anotherSubView.removeUser(); // Sub method.
+	// off UserChangeTitleCallbackOnAnotherView
+	removeAnotherView() {
+		off UserChangeTitleCallback as UserChangeTitleCallbackOnAnotherView
+        this.anotherView.removeUser(); // Sub method.
         this.subView = null;
 	}
 }
@@ -338,21 +339,21 @@ class SubView {
 Notice, that the anonymous lambda function will inherit the classifications:
 
 ```typescript
-// sub UserChangeTitleCallbackOnSubView
-// sub UserChangeTitleCallbackOnAnotherSubView
+// sub UserChangeTitleCallbackOnView
+// sub UserChangeTitleCallbackOnAnotherView
 this.onDestroy(() => {
-    this.removeSubView();  // Sub method.
-    this.removeAnotherSubView();  // Sub method.
+    this.removeView();  // Sub method.
+    this.removeAnotherView();  // Sub method.
 });
 ```
 
 This is due to the fact that the lambda's function's scope does not have matching add method calls for the current sub method calls. Also, since `this.onDestroy` is a method which accept callbacks, and it will balance the containing scope:
 
 ```typescript
-add UserChangeTitleCallback as UserChangeTitleCallbackOnSubView
-this.subView = new View(this.user); // Add method.
-add UserChangeTitleCallback as UserChangeTitleCallbackOnAnotherSubView
-this.anotherSubView = new View(this.user); // Add method.
+add UserChangeTitleCallback as UserChangeTitleCallbackOnView
+this.view = new View(this.user); // Add method.
+add UserChangeTitleCallback as UserChangeTitleCallbackOnAnotherView
+this.anotherView = new View(this.user); // Add method.
 ```
 
 So in other words, The above code will compile. It also causes no memory leaks.
