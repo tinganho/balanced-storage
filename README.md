@@ -14,7 +14,6 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Inheritance](#inheritance)
   * [Callbacks](#callbacks)
   * [Multiple References](#multiple-references)
-  * [Collections](#collections)
     * [Unsafe Add-Sub Collection Methods](#unsafe-add-sub-collection-methods)
   * [Control Flow](#control-flow)
   * [Storage Annotation](#storage-annotation)
@@ -229,7 +228,7 @@ class SuperView {
 }
 ```
 
-If we don't add a sub method call above. The containing method will be annotated as an add method:
+If we don't add a sub method call above. The containing method will be classified as an add method:
 
 ```typescript
 class SuperView {
@@ -243,7 +242,7 @@ class SuperView {
 
 The method `showSubView` inherited the `add` classification from the expression `new View(this.user)`. This inheritance loop goes on and on.
 
-## Callbacks
+## Call paths
 
 We have so far only considered object having an instant death. And this is not so useful. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler checks will pass. Now, this leads us to our next rule:
 
@@ -273,12 +272,18 @@ Now, we have ensured a possible death of our `subView`, because `this.removeSubV
 	this.onDestroy(this.removeSubView); // `this.onDestroy` takes a callback. And we passed in a sub method. Which mean we have a possible death for our `subView`.
 ```
 
-The scope is balanced and the compiler will not complain. Notice, whenever an add method is matched with a sub method directly or whenever there is a path(call path) that can be reached, to match a sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
+The scope is balanced and the compiler will not complain. Notice, whenever an add method is balanced with a sub method directly or whenever there is a path(call path) that can be reached, to balance a sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
 ```
 BIRTH ---> DEATH
-BIRTH ?---> CALL1 ?---> CALL2 ?---> CALLN ?---> DEATH
+BIRTH ?---> CALL1 ---> CALL2 ---> CALLN ---> DEATH
 ```
-Notice, that we say a possible death and not a certain death. We will get back to this later.
+Notice, that we say a possible death and not a certain death. This is because it is upto the business logic to decide when these callbacks should be called or not. Just take our `onDestroy` method in our `SubView` class:
+
+onDestroy(callback: () => void) {
+	this.deleteButton.addEventListener(callback); 
+}
+
+We cannot guarantee that the callback is being called. It is upto the end-user to click the delete button. Though we can guarantee that a call path has a path that at the end calls a method that either adds or subtracts an element in a balanced storage.
 
 ## Multiple References
 
@@ -353,8 +358,6 @@ this.anotherSubView = new View(this.user); // Add method.
 
 So in other words, The above code will compile. It also causes no memory leaks.
 
-## Control Flow
-
 ## Balanced Storage Annotation
 
 One could ask why not annotating the source of the memory leak directly instead of classifying the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class:
@@ -375,7 +378,7 @@ For the add-sub methods the following holds true:
 Add methods: Adds 1 elements.
 Sub methods: Subtracts the added element.
 ```
-And let it be our definitions for our add-sub methods for our case. It is upto a programming language implementor to decide the range.
+And let it be our definitions for our add-sub methods for our case (Though it is upto a programming language implementor to decide what is the definition of the add-sub methods).
 
 ### Add-Sub Storage Annotation Syntax
 
@@ -455,7 +458,7 @@ for (let i = 0; i < callback.length; i++) {
 }
 ```
 
-So, in order to have a balance, we must know that whatever was passed on our add method. Would be passed in our sub method. Lets examine our `View` once again. 
+So, in order to have a balance, we must know that whatever was passed on our add method. Would be passed in our sub method. In that way we will know for sure that whatever was added will eventually get deleted. Lets examine our `View` once again. 
 
 ```ts
 class View<M> {
@@ -486,7 +489,7 @@ The same arguments was passed to our sub method:
 ```ts
 this.user.unregister('change:title', this.showAlert);
 ```
-So we got balance.
+So we got a balance. Now, our add and sub method annotated the containg methods in the `View` class. So who ever consumes the `View` class must balance the method calls in order to not cause a memory leak. And our compiler will always check that this is the case.
 
 ### False Add-Sub Method xample
 
