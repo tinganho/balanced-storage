@@ -14,13 +14,12 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Inheritance](#inheritance)
   * [Callbacks](#callbacks)
   * [Multiple References](#multiple-references)
-    * [Unsafe Add-Sub Collection Methods](#unsafe-add-sub-collection-methods)
   * [Control Flow](#control-flow)
-  * [Storage Annotation](#storage-annotation)
+  * [Balanced Storage Annotation](#balanced-storage-annotation)
     * [Add-Sub Method Definition](#add-sub-method-definition)
-    * [Add-Sub Storage Annotation Syntax](#add-sub-storage-annotation-syntax)
+    * [Syntax](#syntax)
     * [Add Method Example](#add-method-example)
-    * [Off Toggle Example](#sub-method-example)
+    * [Sub Method Example](#sub-method-example)
     * [False Add-Sub Method Example](#false-add-sub-method-example)
   * [Heap Object Graph](#heap-object-graph)
 
@@ -380,7 +379,7 @@ Sub methods: Subtracts the added element.
 ```
 And let it be our definitions for our add-sub methods for our case (Though it is upto a programming language implementor to decide what is the definition of the add-sub methods).
 
-### Add-Sub Storage Annotation Syntax
+### Syntax
 
 We also want to introduce a new syntax to annotate a storage:
 
