@@ -12,7 +12,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
 * [Add-Sub Method Classification](#add-sub-method-classification)
   * [Method Classification](#method-classification)
   * [Inheritance](#inheritance)
-  * [Callbacks](#callbacks)
+  * [Call Paths](#call-paths)
   * [Multiple References](#multiple-references)
   * [Control Flow](#control-flow)
   * [Balanced Storage Annotation](#balanced-storage-annotation)
