@@ -202,11 +202,11 @@ class View<M> {
 
 The methods in our class is now balanced. This leads us to our second rule. A class's methods needs to be balanced. A balanced class has two methods of which one of them having an add method and another having a corresponding sub method. And when a class is balanced it implicitly infers that the a balance check should be done in an another scope other than in the current class's methods. This could be inside an another class's method that uses the current class's add method.
 
-Now, let use the above class in an another class we call `SuperView`:
+Now, let use the above class in an another class we call `SubView`:
 
 ```typescript
-class SuperView {
-    showSubView() {
+class SubView {
+    show() {
         this.subView = new View(this.user); // This call is an add method
         this.subView = null;
     }
@@ -215,14 +215,14 @@ class SuperView {
 
 The above code does not pass the compiler check, because there is no matching sub method. Also the code causes a memory leak.
 
-We can add the call the expression `this.subView.removeUser()` below, to match our add method. Now, on the same scope we have a matching add and sub methods. So the compiler will compile the following code. Also, the code, causes no memory leaks:
+We can add the call the expression `this.view.removeUser()` below, to match our add method. Now, on the same scope we have a matching add and sub methods. So the compiler will compile the following code. Also, the code, causes no memory leaks:
 
 ```typescript
 class SuperView {
-    showSubView() {
-        this.subView = new View(this.user); // Add constructor.
-        this.subView.removeUser(); // Sub method.
-        this.subView = null;
+    show() {
+        this.view = new View(this.user); // Add constructor.
+        this.view.removeUser(); // Sub method.
+        this.view = null;
     }
 }
 ```
@@ -230,16 +230,16 @@ class SuperView {
 If we don't add a sub method call above. The containing method will be classified as an add method:
 
 ```typescript
-class SuperView {
+class SubView {
 	// add UserChangeTitleCallback
-    showSubView() {
-        this.subView = new View(this.user); // Turns the toggle on.
-        this.subView = null;
+    show() {
+        this.view = new View(this.user); // Turns the toggle on.
+        this.view = null;
     }
 }
 ```
 
-The method `showSubView` inherited the `add` classification from the expression `new View(this.user)`. This inheritance loop goes on and on.
+The method `show` inherited the `add` classification from the expression `new View(this.user)`. This inheritance loop goes on and on.
 
 ## Call Paths
 
@@ -248,9 +248,9 @@ We have so far only considered object having an instant death. And this is not s
 Passing a sub method method as a callback argument will balance an add method in current scope:
 
 ```typescript
-class SuperView {
-    showSubView() {
-        this.subView = new View(this.user); // Add method.
+class SubView {
+    show() {
+        this.view = new View(this.user); // Add method.
 		this.onDestroy(this.removeSubView); // Passing a sub method to a call expression matches the add method above.
     }
 	
@@ -259,16 +259,16 @@ class SuperView {
 	}
 	
 	// sub UserChangeTitleCallback
-	removeSubView() {
-        this.subView.removeUser(); // Sub method.
-        this.subView = null;
+	remove() {
+        this.view.removeUser(); // Sub method.
+        this.view = null;
 	}
 }
 ```
-Now, we have ensured a possible death of our `subView`, because `this.removeSubView` has an inherited a `sub` classification:
+Now, we have ensured a possible death of our `view`, because `this.remove` has an inherited a `sub` classification:
 ```typescript
 	this.subView = new View(this.user); // Add method.
-	this.onDestroy(this.removeSubView); // `this.onDestroy` takes a callback. And we passed in a sub method. Which mean we have a possible death for our `subView`.
+	this.onDestroy(this.remove); // `this.onDestroy` takes a callback. And we passed in a sub method. Which mean we have a possible death for our `subView`.
 ```
 
 The scope is balanced and the compiler will not complain. Notice, whenever an add method is balanced with a sub method directly or whenever there is a path(call path) that can be reached, to balance a sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
@@ -297,12 +297,12 @@ Lets go ahead and add these classifications:
 ```typescript
 import { View } from './view';
 
-class SuperView {
+class SubView {
 	private subView: View;
 
 	// add UserChangeTitleCallbackOnSubView
 	// add UserChangeTitleCallbackOnAnotherSubView
-    showSubView() {
+    show() {
 		add UserChangeTitleCallback as UserChangeTitleCallbackOnSubView
         this.subView = new View(this.user); // Add method.
 		add UserChangeTitleEventCallback as UserChangeTitleCallbackOnAnotherSubView
@@ -321,7 +321,7 @@ class SuperView {
 	}
 	
 	// sub UserChangeTitleCallbackOnSubView
-	removeSubView() {
+	remove() {
 		sub UserChangeTitleCallback as UserChangeTitleCallbackOnSubView
         this.subView.removeUser(); // Sub method.
         this.subView = null;
