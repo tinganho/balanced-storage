@@ -1,4 +1,4 @@
-Static Code Analyzation and Prevention of Memory Leaks
+Static Typing for Memory Leak Prevention
 ====================
 
 # Introduction
