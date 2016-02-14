@@ -34,7 +34,7 @@ A memory leak is objects we intended to delete. But instead of being deleted, th
 
 We extend an EventEmitter class to create a user model:
 
-```typescript
+```ts
 class User extends EventEmitter {
     private title: string;
     
@@ -47,7 +47,7 @@ class User extends EventEmitter {
 
 We also define the following view class:
 
-```typescript
+```ts
 class View<M> {
     constructor(private user: User) {
         this.user.on('change:title', () => {
@@ -63,7 +63,7 @@ class View<M> {
 
 Then in some other class's method we instantiate the view with a referenced user model:
 
-```typescript
+```ts
 class SuperView{
     showSubView() {
         this.subView = new View(this.user);
@@ -75,7 +75,7 @@ class SuperView{
 
 As you can see we did a mistake. We unreferenced the sub view. And we expected it to be garbage collected. But instead we caused a memory leak. Did you spot in which line was causing a memory leak? It is on this line:
 
-```typescript
+```ts
 this.user.on('change:title', () => {
     this.showAlert(); // `this` inside the closure is referencing view. So `this.user` is referencing `view`.
 });
@@ -89,7 +89,7 @@ We want to prevent the memory leak by static code analysis. But, in doing so we 
 
 Let us just annotate these methods that uses these references. I have not shown you the `EventEmitter` class yet and lets begin by showing it to you:
 
-```typescript
+```ts
 export class EventEmitter {
     public eventCallbacks: EventCallbacks = {}
 
@@ -129,7 +129,7 @@ Lets just the add a temporary classification syntax for our methods:
 
 The `add` and `sub` keywords are operators that classify methods with a name that identifies that elements is being added or subtracted when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and classify our methods.
 
-```typescript
+```ts
 export class User extends EventEmitter {
     add UserChangeTitleCallback
     public register(event: string, callback: Callback) {
@@ -145,7 +145,7 @@ export class User extends EventEmitter {
 
 Now, every consumer of these two methods will have some additional checks that they need to pass. First, if they are in the same scope they need to call `register` before `unregister`. Or in other words an `add` classified method needs to be called before a `sub` classified method. And through out this document we would refer an `add` classified method as an add method. And a sub classified method as a sub method.
 
-```typescript
+```ts
 class View<M> {
     constructor(private user: User) {
         this.user.register('change:title', this.showAlert);
@@ -156,7 +156,7 @@ class View<M> {
 
 Though, in this case having the method calls on the same scope is not quite useful. Since we unregister the event directly. It would be as good as not calling anything at all. But in order to pass the compiler checks we can also call a sub method in another method.
 
-```typescript
+```ts
 class View<M> {
     private description = 'This is the view of: ';
     
@@ -180,7 +180,7 @@ In the above example. We call `this.user.unregister('change:title', this.showAle
 
 Notice first, that whenever there is a scope with an unmatched add or sub methods. The unmatched methods classifies the containing method. Here we show the inherited classification in the comments below:
 
-```typescript
+```ts
 class View<M> {
     private description = 'This is the view of: ';
     
@@ -204,7 +204,7 @@ The methods in our class is now balanced. This leads us to our second rule. A cl
 
 Now, let use the above class in an another class we call `SubView`:
 
-```typescript
+```ts
 class SubView {
     show() {
         this.subView = new View(this.user); // This call is an add method
@@ -217,7 +217,7 @@ The above code does not pass the compiler check, because there is no matching su
 
 We can add the call the expression `this.view.removeUser()` below, to match our add method. Now, on the same scope we have a matching add and sub methods. So the compiler will compile the following code. Also, the code, causes no memory leaks:
 
-```typescript
+```ts
 class SuperView {
     show() {
         this.view = new View(this.user); // Add constructor.
@@ -229,7 +229,7 @@ class SuperView {
 
 If we don't add a sub method call above. The containing method will be classified as an add method:
 
-```typescript
+```ts
 class SubView {
 	// add UserChangeTitleCallback
     show() {
@@ -247,7 +247,7 @@ We have so far only considered object having an instant death. And this is not s
 
 Passing a sub method method as a callback argument will balance an add method in current scope:
 
-```typescript
+```ts
 class SubView {
     show() {
         this.view = new View(this.user); // Add method.
@@ -266,7 +266,7 @@ class SubView {
 }
 ```
 Now, we have ensured a possible death of our `view`, because `this.remove` has an inherited a `sub` classification:
-```typescript
+```ts
 	this.subView = new View(this.user); // Add method.
 	this.onDestroy(this.remove); // `this.onDestroy` takes a callback. And we passed in a sub method. Which mean we have a possible death for our `subView`.
 ```
@@ -278,9 +278,11 @@ BIRTH ?---> CALL1 ---> CALL2 ---> CALLN ---> DEATH
 ```
 Notice, that we say a possible death and not a certain death. This is because it is upto the business logic to decide when these callbacks should be called or not. Just take our `onDestroy` method in our `SubView` class:
 
+```ts
 onDestroy(callback: () => void) {
 	this.deleteButton.addEventListener(callback); 
 }
+```
 
 We cannot guarantee that the callback is being called. It is upto the end-user to click the delete button. Though we can guarantee that a call path has a path that at the end calls a method that either adds or subtracts an element in a balanced storage.
 
@@ -294,7 +296,7 @@ In order to satisfy our compiler we would need to give our classifications some 
 
 Lets go ahead and add these classifications:
 
-```typescript
+```ts
 import { View } from './view';
 
 class SubView {
@@ -338,7 +340,7 @@ class SubView {
 
 Notice, that the anonymous lambda function will inherit the classifications:
 
-```typescript
+```ts
 // sub UserChangeTitleCallbackOnView
 // sub UserChangeTitleCallbackOnAnotherView
 this.onDestroy(() => {
@@ -349,7 +351,7 @@ this.onDestroy(() => {
 
 This is due to the fact that the lambda's function's scope does not have matching add method calls for the current sub method calls. Also, since `this.onDestroy` is a method which accept callbacks, and it will balance the containing scope:
 
-```typescript
+```ts
 add UserChangeTitleCallback as UserChangeTitleCallbackOnView
 this.view = new View(this.user); // Add method.
 add UserChangeTitleCallback as UserChangeTitleCallbackOnAnotherView
@@ -362,7 +364,7 @@ So in other words, The above code will compile. It also causes no memory leaks.
 
 One could ask why not annotating the source of the memory leak directly instead of classifying the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class:
 
-```typescript
+```ts
 export class EventEmitter {
     public eventCallbacks: EventCallbacks = {}
 }
@@ -378,19 +380,21 @@ For the add-sub methods the following holds true:
 Add methods: Adds 1 elements.
 Sub methods: Subtracts the added element.
 ```
+
 And let it be our definitions for our add-sub methods for our case (Though it is upto a programming language implementor to decide what is the definition of the add-sub methods).
 
 ### Syntax
 
 We also want to introduce a new syntax to annotate a storage:
 
->*AddSubClassification ::* **balance** *Name* *StorageDeclaration*
+>*AddSubClassification ::* **balance** *Storage* as *ElementName* *StorageDeclaration*
+*Storage ::* *Type([Index]*)*
 
 Lets annotate our `eventCallbacks` store:
 
-```typescript
+```ts
 export class User extends EventEmitter {
-    balance UserEventCallback
+    balance EventCallbacks[event] as EventCallback
     public eventCallbacks: EventCallbacks = {}
 }
 ```
@@ -401,7 +405,7 @@ Notice, also when we now have an annotation for the storage. We don't need to cl
 
 Now, we can staticly analyse the `register` method, which is suppose to be an add method:
 
-```typescript
+```ts
 public register(event: string, callback: Callback) {
     if (!this.eventCallbacks[event]) {
         this.eventCallbacks[event] = []; 
@@ -412,7 +416,7 @@ public register(event: string, callback: Callback) {
 
 Lets check out our if statement and body:
 
-```typescript
+```ts
 if (!this.eventCallbacks[event]) {
     this.eventCallbacks[event] = [];
 }
@@ -422,7 +426,7 @@ An assignment adds 0 or 1 new elements to the store. Though we have only specifi
 
 In comparison, the following expression adds one element to the store:
 
-```typescript
+```ts
 this.eventCallbacks[event].push(callback);
 ```
 
@@ -432,7 +436,7 @@ So in all, we can safely say that the method adds 1 element to the store `eventC
 
 Now, lets examine our `unregister` method:
 
-```typescript
+```ts
 public unregister(event: string, callback: Callback): void {
     let callbacks = this.eventCallbacks[event].length;
     for (let i = 0; i < callback.length; i++) {
@@ -445,7 +449,7 @@ public unregister(event: string, callback: Callback): void {
 ```
 We can statically confirm that this method subtracts 0 or 1 elements from our store with the following expression(even though it is encapsulated in a for-loop and an if statement block):
 
-```typescript
+```ts
 this.eventCallbacks[event].splice(i, 1);
 ```
 Please also notice that the add methods adds 1 element and the sub method subtracts 0 or 1 element. So logically there still could be a potential memory leak. Though, our method above has a for loop that loops through all elements and a check for an element existens before a subtraction of element occur. This is crucial for balancing our storage:
@@ -491,7 +495,7 @@ this.user.unregister('change:title', this.showAlert);
 ```
 So we got a balance. Now, our add and sub method annotated the containg methods in the `View` class. So who ever consumes the `View` class must balance the method calls in order to not cause a memory leak. And our compiler will always check that this is the case.
 
-### False Add-Sub Method xample
+### False Add-Sub Method example
 
 Lets also examine an false add-sub method example. Lets take our `emit` method as an example:
 
