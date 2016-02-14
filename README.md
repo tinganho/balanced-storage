@@ -292,7 +292,7 @@ We some times, need to deal with multiple references of the same class of object
 
 In order to satisfy our compiler we would need to give our classifications some aliases. And the syntax for aliasing a classification is:
 <pre>
-<i>AddSubAliasClassification ::</i> <b>add<b> | <b>sub</b> <i>Name</i> <b>as</b> <i>Alias CallExpression</i>
+<i>AddSubAliasClassification ::</i> <b>add</b> | <b>sub</b> <i>Name</i> <b>as</b> <i>Alias CallExpression</i>
 </pre>
 Lets go ahead and add these classifications:
 
