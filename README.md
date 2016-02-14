@@ -2,7 +2,7 @@ Static Typing for Memory Leak Prevention
 ====================
 
 # Introduction
-Software has been daunted with memory leaks for a long time. There exists one interesting question to ask, can we make memory management more safe with static code analysis? Can we make a compiler help us with common mistakes made, when dealing with memory management?
+Software has been daunted with memory leaks for a long time. There exists one interesting question to ask, can we make memory management more safe with static code analysis? Can we make a compiler help us with common mistakes, when dealing with memory management?
 
 # Table of Contents
 * [Introduction](#abstract)
@@ -390,6 +390,7 @@ And let it be our definitions for our add-sub methods for our case (Though it is
 ### Syntax
 
 We also want to introduce a new syntax to annotate a storage:
+
 <pre>
 <i>AddSubClassification ::</i>
 &emsp;&emsp;<b>balance</b> <i>Storage</i> <b>as</b> <i>ElementName StorageDeclaration</i>
@@ -398,17 +399,10 @@ We also want to introduce a new syntax to annotate a storage:
 &emsp;&emsp;<i>Type, { IndexExpression }</i>
 
 <i>IndexExpression ::</i>
-&emsp;&emsp;<i>"[", Index, "]"</i>
+&emsp;&emsp;<i>"[", Key ,"]"</i>
 </pre>
-*StorageDeclaration* is a property declaration in a class. *ElementName* is the name of an element in *StorageDeclaration*. Also as we use TypeScript as our language here as an example. TypeScript can define index signatures and the *Index* above corresponds to the key name in an index signature declaration.
 
-Here is an example of an index signature declaration for our interface type `EventCallbacks`:
-
-```ts
-interface EventCallbacks {
-    [event: string]: Callback[];
-}
-```
+*StorageDeclaration* is a property declaration in a class. *ElementName* is the name of an element in *StorageDeclaration*. The *Key* above is an arbitrary identifier. It does not need to match anything. It is just there for readability. Though the whole index expression indicates it should go one or more levels deeper to indicate an element addition or subtraction is made when the compiler do static analysis of the add methods and sub methods. More on this later.
 
 Lets annotate our `eventCallbacks` store:
 
