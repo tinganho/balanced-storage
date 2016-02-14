@@ -64,10 +64,10 @@ class View<M> {
 Then in some other class's method we instantiate the view with a referenced user model:
 
 ```ts
-class SuperView{
-    showSubView() {
-        this.subView = new View(this.user);
-        this.subView = null; // this.user persists.
+class SubView {
+    show() {
+        this.view = new View(this.user);
+        this.view = null; // this.user persists.
         // A memory leak, `view` cannot be garbage collected.
     }
 }
@@ -291,9 +291,9 @@ We cannot guarantee that the callback is being called. It is upto the end-user t
 We some times, need to deal with multiple references of the same class of objects. The compiler will not pass the code if there is two classifications that have the same name. This is because we want to associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
 
 In order to satisfy our compiler we would need to give our classifications some aliases. And the syntax for aliasing a classification is:
-
->*AddSubAliasClassification ::* **add** | **sub** *Name* **as** *Alias* *CallExpression*
-
+<pre>
+<i>AddSubAliasClassification ::</i> <b>add<b> | <b>sub</b> <i>Name</i> <b>as</b> <i>Alias CallExpression</i>
+</pre>
 Lets go ahead and add these classifications:
 
 ```ts
