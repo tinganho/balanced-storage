@@ -386,10 +386,11 @@ And let it be our definitions for our add-sub methods for our case (Though it is
 ### Syntax
 
 We also want to introduce a new syntax to annotate a storage:
-
+```
 *AddSubClassification ::* **balance** *Storage* as *ElementName* *StorageDeclaration*
 
 *Storage ::* *Type([Index]*)*
+```
 
 Lets annotate our `eventCallbacks` store:
 
