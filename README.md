@@ -400,7 +400,15 @@ We also want to introduce a new syntax to annotate a storage:
 <i>IndexExpression ::</i>
 &emsp;&emsp;<i>"[", Index, "]"</i>
 </pre>
-*StorageDeclaration* is a property declaration in a class. *ElementName* is the name of an element in *StorageDeclaration*. Also as we use TypeScript as our language here as an example. TypeScript can defined IndexType
+*StorageDeclaration* is a property declaration in a class. *ElementName* is the name of an element in *StorageDeclaration*. Also as we use TypeScript as our language here as an example. TypeScript can define index signatures and the *Index* above corresponds to the key name in an index signature declaration.
+
+Here is an example of an index signature declaration for our interface type `EventCallbacks`:
+
+```ts
+interface EventCallbacks {
+    [event: string]: Callback[];
+}
+```
 
 Lets annotate our `eventCallbacks` store:
 
