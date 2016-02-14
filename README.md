@@ -126,8 +126,8 @@ The `eventCallbacks` above is hashmap of a list of callbacks for each event. We 
 Lets just the add a temporary classification syntax for our methods:
 
 <pre>
-<i>MethodClassifiction ::
-&emsp;&emsp;</i> <b>add</b> | <b>sub</b> <i>Name MethodDeclaration</i>
+<i>MethodClassifiction ::</i>
+&emsp;&emsp;<b>add</b> | <b>sub</b> <i>Name MethodDeclaration</i>
 </pre>
 
 The `add` and `sub` keywords are operators that classify methods with a name that identifies that elements is being added or subtracted when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and classify our methods.
@@ -295,7 +295,8 @@ We some times, need to deal with multiple references of the same class of object
 
 In order to satisfy our compiler we would need to give our classifications some aliases. And the syntax for aliasing a classification is:
 <pre>
-<i>AddSubAliasClassification ::</i> <b>add</b> | <b>sub</b> <i>Name</i> <b>as</b> <i>Alias CallExpression</i>
+<i>AddSubAliasClassification ::</i>
+&emsp;&emsp;<b>add</b> | <b>sub</b> <i>Name</i> <b>as</b> <i>Alias CallExpression</i>
 </pre>
 Lets go ahead and add these classifications:
 
@@ -390,9 +391,12 @@ And let it be our definitions for our add-sub methods for our case (Though it is
 
 We also want to introduce a new syntax to annotate a storage:
 <pre>
-<i>AddSubClassification ::</i> <b>balance</b> <i>Storage</i> <b>as</b> <i>ElementName StorageDeclaration</i>
-<i>Storage :: Type, { IndexExpression }</i>
-<i>IndexExpression :: "[", Index, "]"</i>
+<i>AddSubClassification ::</i>
+&emsp;&emsp;<b>balance</b> <i>Storage</i> <b>as</b> <i>ElementName StorageDeclaration</i>
+<i>Storage ::</i>
+&emsp;&emsp;<i>Type, { IndexExpression }</i>
+<i>IndexExpression ::</i>
+&emsp;&emsp;<i>"[", Index, "]"</i>
 </pre>
 *StorageDeclaration* is a property declaration in a class. *ElementName* is the name of an element in *StorageDeclaration*. Also as we use TypeScript as our language here as an example. TypeScript can defined IndexType
 
