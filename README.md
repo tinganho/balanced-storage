@@ -249,17 +249,17 @@ Passing a sub method method as a callback argument will balance an add method in
 
 ```ts
 class SubView {
-    show() {
+    public show() {
         this.view = new View(this.user); // Add method.
-		this.onDestroy(this.removeSubView); // Passing a sub method to a call expression matches the add method above.
+		this.onDestroy(this.remove); // Passing a sub method to a call expression matches the add method above.
     }
 	
-	onDestroy(callback: () => void) {
+	private onDestroy(callback: () => void) {
 		this.deleteButton.addEventListener(callback); 
 	}
 	
 	// sub UserChangeTitleCallback
-	remove() {
+	public remove() {
         this.view.removeUser(); // Sub method.
         this.view = null;
 	}
@@ -305,7 +305,7 @@ class SubView {
 
 	// add UserChangeTitleCallbackOnView
 	// add UserChangeTitleCallbackOnAnotherView
-    show() {
+    public show() {
 		add UserChangeTitleCallback as UserChangeTitleCallbackOnView
         this.view = new View(this.user); // Add method.
 		add UserChangeTitleEventCallback as UserChangeTitleCallbackOnAnotherView
@@ -319,18 +319,18 @@ class SubView {
         });
     }
 	
-	onDestroy(callback: () => void) {
+	private onDestroy(callback: () => void) {
 		this.deleteButton.addEventListener(callback); 
 	}
 	
 	// sub UserChangeTitleCallbackOnView
-	removeView() {
+	public removeView() {
 		sub UserChangeTitleCallback as UserChangeTitleCallbackOnView
         this.view.removeUser(); // Sub method.
         this.view = null;
 	}
 	// off UserChangeTitleCallbackOnAnotherView
-	removeAnotherView() {
+	public removeAnotherView() {
 		off UserChangeTitleCallback as UserChangeTitleCallbackOnAnotherView
         this.anotherView.removeUser(); // Sub method.
         this.subView = null;
@@ -387,7 +387,7 @@ And let it be our definitions for our add-sub methods for our case (Though it is
 
 We also want to introduce a new syntax to annotate a storage:
 
->*AddSubClassification ::* **balance** *Storage* as *ElementName* *StorageDeclaration*
+*AddSubClassification ::* **balance** *Storage* as *ElementName* *StorageDeclaration*
 *Storage ::* *Type([Index]*)*
 
 Lets annotate our `eventCallbacks` store:
