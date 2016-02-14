@@ -279,7 +279,7 @@ The scope is balanced and the compiler will not complain. Notice, whenever an ad
 BIRTH ---> DEATH
 BIRTH ?---> CALL1 ---> CALL2 ---> CALLN ---> DEATH
 ```
-Notice, that we say a possible death and not a certain death. This is because it is upto the business logic to decide when these callbacks should be called or not. Just take our `onDestroy` method in our `SubView` class:
+Notice, that we say a possible death and not a certain death. This is because it is sometimes upto the business logic to decide when these callbacks should be called or not. Just take our `onDestroy` method in our `SubView` class:
 
 ```ts
 onDestroy(callback: () => void) {
