@@ -388,9 +388,10 @@ And let it be our definitions for our add-sub methods for our case (Though it is
 We also want to introduce a new syntax to annotate a storage:
 <pre>
 <i>AddSubClassification ::</i> <b>balance</b> <i>Storage</i> <b>as</b> <i>ElementName StorageDeclaration</i>
-<i>Storage :: Type, { Index }</i>
-<i>Index :: "[", Name, "]"</i>
+<i>Storage :: Type, { IndexExpression }</i>
+<i>IndexExpression :: "[", Index, "]"</i>
 </pre>
+*StorageDeclaration* is a property declaration in a class. *ElementName* is the name of an element in *StorageDeclaration*.
 
 Lets annotate our `eventCallbacks` store:
 
