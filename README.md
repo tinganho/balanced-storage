@@ -177,7 +177,7 @@ class View<M> {
 }
 ```
 
-In the above example. We call `this.user.unregister('change:title', this.showAlert);` to pass the compiler check.
+In the above example. We call `this.user.unregister('change:title', this.showAlert);` in the method `removeUser` to pass the compiler check. We pass the compiler check because the class's methods is now balanced. There is one add method and one sub method on the class.
 
 ## Inheritance
 
