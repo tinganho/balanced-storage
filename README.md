@@ -393,8 +393,10 @@ We also want to introduce a new syntax to annotate a storage:
 <pre>
 <i>AddSubClassification ::</i>
 &emsp;&emsp;<b>balance</b> <i>Storage</i> <b>as</b> <i>ElementName StorageDeclaration</i>
+<br/>
 <i>Storage ::</i>
 &emsp;&emsp;<i>Type, { IndexExpression }</i>
+<br/>
 <i>IndexExpression ::</i>
 &emsp;&emsp;<i>"[", Index, "]"</i>
 </pre>
