@@ -387,9 +387,9 @@ And let it be our definitions for our add-sub methods for our case (Though it is
 
 We also want to introduce a new syntax to annotate a storage:
 <pre>
-<i>AddSubClassification :: <b>balance</b> Storage as ElementName StorageDeclaration
-Storage :: Type([Index])
-</i>
+<i>AddSubClassification ::</i> <b>balance</b> <i>Storage</i> <b>as</b> <i>ElementName StorageDeclaration</i>
+<i>Storage :: Type, { Index }</i>
+<i>Index :: "[", Name, "]"</i>
 </pre>
 
 Lets annotate our `eventCallbacks` store:
