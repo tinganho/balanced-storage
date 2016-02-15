@@ -10,8 +10,8 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Definition](#definition)
   * [Example](#example) 
 * [Add-Sub Method Classification](#add-sub-method-classification)
-  * [Method Classification](#method-classification)
   * [Balance](#balance)
+  * [Method Classification](#method-classification)
   * [Inheritance](#inheritance)
   * [Call Paths](#call-paths)
   * [Loop Paths](#loop-paths)
@@ -123,6 +123,14 @@ export class EventEmitter {
 
 The `eventCallbacks` above is hashmap of a list of callbacks for each event. We register new events with the `register` method and unregister them with the `unregister` method. We can emit a new event with the `emit` method. The property `eventCallbacks` is a potential leaking resource storage, because it can hold callbacks on events and a developer might forgot to unregister. Though the essentials here, is the `register` and `unregister` methods. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `register` always call `unregister`? If possible, we would prevent having any memory leaks. Let us answer this question later, and begin with annotating them first. 
 
+## Balance
+Our general definition of a balanced scope is:
+
+```
+Balance: Whenever an element added in a storage have a possibility of being subtracted.
+```
+We will us this definition through out this document.
+
 ## Method Classification
 
 Lets just the add a temporary classification syntax for our methods:
@@ -181,8 +189,6 @@ class View {
 ```
 
 In the above example. We call `this.user.unregister('change:title', this.showAlert);` in the method `removeUser` to pass the compiler check. We pass the compiler check because the class's methods is now balanced. There is one add method and one sub method on the class. 
-
-## Balance
 
 To achieve balance either a scope needs to be balanced or a class's methods neeed to be balanced. A balanced scope, means that there is a sub method balancing an add method. A balanced class, means that there exists a corresponding sub method for an add method.
 
@@ -269,12 +275,11 @@ We have so far only considered object having an instant death. And this is not s
 ```
 Passing a sub method method as a callback argument will balance an add method in current scope.
 ```
-And we would need to also update our balance table:
+And we also need to add the rule to our balance table:
 
 Target | Elements | Balance
 --- | --- | ---
-Class| Methods | For every add method there must exist a corresponding sub method.
-Scope | Call expressions | Fore every call expression for an add method there must exist a corresponding a sub method call expression or a call expression that has passed an argument of a corresponding sub method.
+Scope | Call expressions | Fore every add method call expression there must exist a call expression that has passed an argument of a corresponding sub method.
 
 Lets go ahead and add our call expression, that accepts a corresponding sub method for our add method:
 
@@ -418,6 +423,17 @@ Though looping infinite of times is not a requirement for reaching a balance. Th
 ![Loop Path of an Object](https://gitlab.com/tinganho/balanced-storage/raw/master/LoopPath@2x.jpg)
 
 In the first loop it can enter a branch, which an element gets added. In the second loop or any subsequent loops it can enter a branch where it gets deleted. It can also enter a branch or two branches where an elements gets created and destroyed at the same loop.
+
+So for loops, whether it is a while loop or a for loop that can loop at least more than once. The following rule governs the balance.
+
+```
+If in a loop, and the loop only loops once:
+&emps;&emps;Balance can be reached if in one branch has an add method and a sub method.
+&emps;&emps;Balance can be reached, if one branch has an add method and another branch has a sub method, only if the add method and submethod branch is both being entered and the add method branch is entered before the sub method branch.
+
+If in a loop, and the loop loops twice or more:
+&emps;&emps;Balance can be reached if in one branch has an add method and another branch has a sub method.
+```
 
 Here is the whole application source code:
 
