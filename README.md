@@ -50,7 +50,7 @@ class User extends EventEmitter {
 We also define the following view class:
 
 ```ts
-class View<M> {
+class View {
     constructor(private user: User) {
         this.user.on('change:title', () => {
             this.showAlert();
