@@ -127,7 +127,7 @@ The `eventCallbacks` above is hashmap of a list of callbacks for each event. We 
 Lets just the add a temporary classification syntax for our methods:
 
 <pre>
-<i>MethodClassifiction ::</i>
+<i>MethodClassification ::</i>
 &emsp;&emsp;<b>add</b> | <b>sub</b> <i>Name MethodDeclaration</i>
 </pre>
 
