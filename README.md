@@ -332,7 +332,7 @@ We will use a C++ console application to show what a loop path is. Our console a
 1. Add an item.
 2. Delete an item.
 3. Show all items.
-4. Quite application.
+4. Quit application.
 
 Each item is defined as:
 
