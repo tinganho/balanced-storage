@@ -417,7 +417,7 @@ Though looping infinite of times is not a requirement for reaching a balance. Th
 
 ![Loop Path of an Object](https://gitlab.com/tinganho/balanced-storage/raw/master/LoopPath@2x.jpg)
 
-In the first loop it can enter a branch, which an element gets added. In the second loop or any subsequent loops it can enter a branch where it gets deleted. It can also enter branch where an elements gets created and destroyed at the same loop.
+In the first loop it can enter a branch, which an element gets added. In the second loop or any subsequent loops it can enter a branch where it gets deleted. It can also enter a branch or two branches where an elements gets created and destroyed at the same loop.
 
 Here is the whole application source code:
 
