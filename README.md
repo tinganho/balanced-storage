@@ -14,6 +14,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Balance](#balance)
   * [Inheritance](#inheritance)
   * [Call Paths](#call-paths)
+  * [Loop Paths](#loop-paths)
   * [Aliasing](#aliasing)
   * [Control Flow](#control-flow)
   * [Balanced Storage Annotation](#balanced-storage-annotation)
@@ -151,7 +152,7 @@ export class User extends EventEmitter {
 Now, every consumer of these two methods will have some additional checks that they need to pass. First, if they are in the same scope they need to call `register` before `unregister`. Or in other words an `add` classified method needs to be called before a `sub` classified method. And through out this document we would refer an `add` classified method as an add method. And a sub classified method as a sub method.
 
 ```ts
-class View<M> {
+class View {
     constructor(private user: User) {
         this.user.register('change:title', this.showAlert);
         this.user.unregister('change:title', this.showAlert);
@@ -162,7 +163,7 @@ class View<M> {
 Though, in this case having the method calls on the same scope is not quite useful. Since we unregister the event directly. It would be as good as not calling anything at all. But in order to pass the compiler checks we can also call a sub method in another method.
 
 ```ts
-class View<M> {
+class View {
     private description = 'This is the view of: ';
     
     constructor(private user: User) {
@@ -322,6 +323,112 @@ onDestroy(callback: () => void) {
 
 We cannot guarantee that the callback is being called. It is upto the end-user to click the delete button. Though we can guarantee that a call path has a path that at the end calls a method that either adds or subtracts an element in a balanced storage.
 
+## Loop Paths
+
+In addition to call paths, we can also create a loop path, to  make objects live longer than an instance.
+
+We will use a c++ console application to show what a loop path is. Our console application will give you four choices:
+
+1. Add item.
+2. Delete item.
+3. Show all items.
+4. Quite application.
+
+Each item is defined as:
+```c++
+struct Item {
+    string name;
+    Item(string _name):name(_name) {}
+};
+```
+
+```c++
+
+#include <iostream>
+#include <vector>
+#include <ctype.h>
+
+using namespace std;
+
+struct Item {
+    string name;
+    Item(string _name):name(_name) {}
+};
+
+class Storage {
+public:
+    vector<Item*> objects;
+    Storage(): objects { new Item { "eyeglasses" } } {}
+};
+
+void clearInput()
+{
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
+int main ()
+{
+    Storage storage;
+    char answer;
+    
+    while (true) {
+        cout << "What do you want to do?" << endl;
+        cout << " (1) Add an item." << endl;
+        cout << " (2) Delete an item." << endl;
+        cout << " (3) Print all items." << endl;
+        cout << " (q) Quit." << endl;
+        cin >> answer;
+        if (cin.fail()) {
+            clearInput();
+            cout << "Wrong answer!" << endl;
+            continue;
+        }
+        if (answer == 'q') {
+            break;
+        }
+        if (!(answer >= '1' && answer <= '3')) {
+            clearInput();
+            cout << "Wrong answer!" << endl;
+            continue;
+        }
+        if (answer == '1') {
+            string itemName;
+            while (true) {
+                cout << "Type the item you want to add:" << endl;
+                cin >> itemName;
+                if (cin.fail()) {
+                    clearInput();
+                    cout << "Wrong answer!" << endl;
+                    continue;
+                }
+                
+                storage.objects.push_back(new Item {itemName});
+                cout << "Added object: " + itemName << endl;
+                break;
+            }
+        }
+        else if(answer == '2') {
+            int index;
+            cout << "Type the index on the item you want to delete:" << endl;
+            cin >> index;
+            auto item = storage.objects.begin() + index;
+            storage.objects.erase(item);
+            delete *item;
+        }
+        else {
+            auto objects = storage.objects;
+            auto storageLength = objects.size();
+            for (int i = 0; i<storageLength; i++) {
+                cout << objects[i]->name << endl;
+            }
+        }
+    }
+    
+    return 0;
+}
+```
+
 ## Aliasing
 
 We some times, need to deal with multiple references of the same class of objects. The compiler will not pass the code if there is two classifications that have the same name. This is because we want to associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
@@ -414,11 +521,19 @@ Our general concept so far, is that for every method for addition of objects, th
 For the add-sub methods the following holds true:
 
 ```
-Add methods: Adds 1 elements.
-Sub methods: Subtracts the added element.
+Add methods: Adds elements.
+Sub methods: Subtracts elements.
 ```
 
-And let it be our definitions for our add-sub methods for our case (Though it is upto a programming language implementor to decide what is the definition of the add-sub methods).
+And let it be our definitions for our add-sub methods for our case.
+
+### Balance Scope Definition
+
+We also need a definition for what a balance scope is.
+```
+An added element eventually gets subtracted.
+```
+A programming language designer can decide whatever strictness of a balance definition he wants. Though a more strict balance definition might yield a less productive programming langauge. In our balance scope definition, we choose the most strict one.
 
 ### Syntax
 
@@ -505,7 +620,7 @@ We can statically confirm that this method subtracts 0 or 1 elements from our st
 ```ts
 this.eventCallbacks[event].splice(i, 1);
 ```
-Please also notice that the add methods adds 1 element and the sub method subtracts 0 or 1 element. So logically there still could be a potential memory leak. Though, our method above has a for loop that loops through all elements and a check for an element existens before a subtraction of element occur. This is crucial for balancing our storage:
+Please also notice that the add methods adds 1 element and the sub method subtracts 0 or 1 element for each call. So logically there still could be a potential memory leak. Though, our method above has a for loop that loops through all elements and a check for an element existens before a subtraction of element occur. This is crucial for balancing our storage:
 
 ```ts
 for (let i = 0; i < callback.length; i++) {
@@ -518,7 +633,7 @@ for (let i = 0; i < callback.length; i++) {
 So, in order to have a balance, we must know that whatever was passed on our add method. Would be passed in our sub method. In that way we will know for sure that whatever was added will eventually get deleted. Lets examine our `View` once again. 
 
 ```ts
-class View<M> {
+class View {
     private description = 'This is the view of: ';
 
     // add UserChangeTitleCallback
@@ -552,7 +667,7 @@ So we got a balance. Now, our add and sub method annotated the containg methods 
 
 Lets also examine an false add-sub method example. Lets take our `emit` method as an example:
 
-```typescript
+```ts
 public emit(event: string, args: any[]) {
     if (this.eventCallbackStore[event]) {
         for (let callback of this.eventCallbackStore[event]) {
