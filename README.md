@@ -2,7 +2,7 @@ Static Typing for Memory Leak Prevention
 ====================
 
 # Introduction
-Software has been daunted with memory leaks for a long time. There exists one interesting question to ask, can we make memory management more safe with static code analysis? Can we make a compiler help us with common mistakes, when dealing with memory management?
+Software has been daunted with memory leaks for a long time. There exists one interesting question to ask, can we make memory management more safe with static code analysis? Can we make a compiler help us with common mistakes made, when dealing with memory management?
 
 # Table of Contents
 * [Introduction](#abstract)
