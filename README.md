@@ -413,6 +413,7 @@ Or we can choose an option for deleting one item:
 
 Now, if we consider our while loop, looping infinite of time. And according to Murphys law, whatever can happen, will happen. we can derive that what eventually gets added to our storage must eventually be deleted. 
 
+![Loop Path of an Object](https://gitlab.com/tinganho/balanced-storage/blob/master/LoopPath@2x.jpg)
 
 Though looping infinite of times is not a requirement for reaching a balance. The requirement is just for looping once. Because then an added item have a possible death. Which is our definition of balance.
 
@@ -777,4 +778,4 @@ When we have a memory leak. Essentially what it means is that our heap object gr
 
 And we want to statically annotate that any consumer of this node needs to call an add and sub methods:
 
-![Heap object infinity with on and off toggles](https://raw.githubusercontent.com/tinganho/a-toggle-modifier-proposal/master/HeapObjectTreeHorizontalOnOff%402x.jpg)
+![Heap object infinity with on and off toggles](https://gitlab.com/tinganho/balanced-storage/raw/master/HeapObjectTreeHorizontalOnOff@2x.jpg)
