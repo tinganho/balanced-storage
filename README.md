@@ -327,20 +327,96 @@ We cannot guarantee that the callback is being called. It is upto the end-user t
 
 In addition to call paths, we can also create a loop path, to  make objects live longer than an instance.
 
-We will use a c++ console application to show what a loop path is. Our console application will give you four choices:
+We will use a C++ console application to show what a loop path is. Our console application will give you four choices:
 
-1. Add item.
-2. Delete item.
+1. Add an item.
+2. Delete an item.
 3. Show all items.
 4. Quite application.
 
 Each item is defined as:
+
 ```c++
 struct Item {
     string name;
     Item(string _name):name(_name) {}
 };
 ```
+
+And our storage as:
+
+```c++
+class Storage {
+public:
+    vector<Item*> items;
+    
+    Storage(): items { new Item { "eyeglasses" } } {}
+    
+    void addItem(string name) {
+        items.push_back(new Item {name});
+    }
+    
+    void deleteItem(int index) {
+        auto item = items.begin() + index;
+        objects.erase(item);
+        delete *item;
+    }
+};
+```
+
+The compiler will statically classify `addItem` is an add method and `deleteItem` is a sub method.
+
+We then have while loop that ask us our options:
+
+```c++
+while (true) {
+    cout << "What do you want to do?" << endl;
+    cout << " (1) Add an item." << endl;
+    cout << " (2) Delete an item." << endl;
+    cout << " (3) Print all items." << endl;
+    cout << " (q) Quit." << endl;
+    cin >> answer;
+    ...
+}
+```
+
+And we can choose an option for adding one item:
+
+```c++
+    if (answer == '1') {
+        string itemName;
+        while (true) {
+            cout << "Type the item you want to add:" << endl;
+            cin >> itemName;
+            if (cin.fail()) {
+                clearInput();
+                cout << "Wrong answer!" << endl;
+                continue;
+            }
+            storage.addItem(itemName);
+            cout << "Added object: " + itemName << endl;
+            break;
+        }
+    }
+```
+
+Or we can choose an option for deleting one item:
+
+```c++
+    else if(answer == '2') {
+        int index;
+        cout << "Type the index on the item you want to delete:" << endl;
+        cin >> index;
+        storage.deleteItem(index);
+    }
+```
+
+Now, if we consider our while loop, looping infinite of time. And according to Murphys law, whatever can happen, will happen. we can derive that what eventually gets added to our storage must eventually be deleted. 
+
+
+Though looping infinite of times is not a requirement for reaching a balance. The requirement is just for looping once. Because then an added item have a possible death. Which is our definition of balance.
+
+Here is the whole application source code:
 
 ```c++
 
@@ -359,6 +435,16 @@ class Storage {
 public:
     vector<Item*> objects;
     Storage(): objects { new Item { "eyeglasses" } } {}
+    
+    void addItem(string name) {
+        objects.push_back(new Item {name});
+    }
+    
+    void deleteItem(int index) {
+        auto item = objects.begin() + index;
+        objects.erase(item);
+        delete *item;
+    }
 };
 
 void clearInput()
@@ -402,8 +488,7 @@ int main ()
                     cout << "Wrong answer!" << endl;
                     continue;
                 }
-                
-                storage.objects.push_back(new Item {itemName});
+                storage.addItem(itemName);
                 cout << "Added object: " + itemName << endl;
                 break;
             }
@@ -412,9 +497,7 @@ int main ()
             int index;
             cout << "Type the index on the item you want to delete:" << endl;
             cin >> index;
-            auto item = storage.objects.begin() + index;
-            storage.objects.erase(item);
-            delete *item;
+            storage.deleteItem(index);
         }
         else {
             auto objects = storage.objects;
@@ -427,6 +510,7 @@ int main ()
     
     return 0;
 }
+
 ```
 
 ## Aliasing
