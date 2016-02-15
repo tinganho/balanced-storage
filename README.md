@@ -413,7 +413,7 @@ Or we can choose an option for deleting one item:
 
 Now, if we consider our while loop, looping infinite of time. And according to Murphys law, whatever can happen, will happen. we can derive that what eventually gets added to our storage must eventually be deleted. 
 
-![Loop Path of an Object](https://gitlab.com/tinganho/balanced-storage/blob/master/LoopPath@2x.jpg)
+![Loop Path of an Object](https://gitlab.com/tinganho/balanced-storage/raw/master/LoopPath@2x.jpg)
 
 Though looping infinite of times is not a requirement for reaching a balance. The requirement is just for looping once. Because then an added item have a possible death. Which is our definition of balance.
 
