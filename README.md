@@ -11,6 +11,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Example](#example) 
 * [Add-Sub Method Classification](#add-sub-method-classification)
   * [Method Classification](#method-classification)
+  * [Balance](#balance)
   * [Inheritance](#inheritance)
   * [Call Paths](#call-paths)
   * [Aliasing](#aliasing)
@@ -25,7 +26,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
 
 # Memory Leaks
 
-Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counting. We will try to cover some of these problems and present a solution to these problems.
+Long runnning applications needs to allocate memory to store objects that lives a long time. Though, during allocation and storing of objects a developer might forget to handle the case when the object is no longer needed, and it needs to be deleted. Even though, the developer remembers to handle the deletion of objects, there still exists blind spots where the reference count of objects does not reach zero and thus creates a memory leak in a garbage collected language or languages that uses reference counting. We will try to cover some of these problems and present a solution to these problems.
 
 ## Definition
 A memory leak is objects we intended to delete. But instead of being deleted, they remained on runtime.
@@ -73,7 +74,7 @@ class SubView {
 }
 ```
 
-As you can see we did a mistake. We unreferenced the sub view. And we expected it to be garbage collected. But instead we caused a memory leak. Did you spot in which line was causing a memory leak? It is on this line:
+As you can see we did a mistake. We unreferenced the view. And we expected it to be garbage collected. But instead we caused a memory leak. Did you spot in which line was causing a memory leak? It is on this line:
 
 ```ts
 this.user.on('change:title', () => {
@@ -119,7 +120,7 @@ export class EventEmitter {
 }
 ```
 
-The `eventCallbacks` above is hashmap of a list of callbacks for each event. We register new events with the `register` method and unregister them with the `unregister` method. We can emit a new event with the `emit` method. The property `eventCallbacks` is a potential leaking resource storage, because it can hold callbacks on events and a developer might forgot to unregister some of those events when no longer needed. Though the essentials here, is the `register` and `unregister` methods. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `register` always call `unregister`? If possible, we would prevent having any memory leaks. Let us answer this question later, and begin with annotating them first. 
+The `eventCallbacks` above is hashmap of a list of callbacks for each event. We register new events with the `register` method and unregister them with the `unregister` method. We can emit a new event with the `emit` method. The property `eventCallbacks` is a potential leaking resource storage, because it can hold callbacks on events and a developer might forgot to unregister. Though the essentials here, is the `register` and `unregister` methods. Because their role is to register and unregister events. This leads us to think, can we somehow require a user who calls `register` always call `unregister`? If possible, we would prevent having any memory leaks. Let us answer this question later, and begin with annotating them first. 
 
 ## Method Classification
 
@@ -130,10 +131,11 @@ Lets just the add a temporary classification syntax for our methods:
 &emsp;&emsp;<b>add</b> | <b>sub</b> <i>Name MethodDeclaration</i>
 </pre>
 
-The `add` and `sub` keywords are operators that classify methods with a name that identifies that elements is being added or subtracted when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and classify our methods.
+The `add` and `sub` keywords are operators that classify methods with a name that identifies that elements is being added or subtracted from our storage, when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and classify our methods.
 
 ```ts
 export class User extends EventEmitter {
+
     add UserChangeTitleCallback
     public register(event: string, callback: Callback) {
         super.register.apply(this, arguments);
@@ -177,7 +179,16 @@ class View<M> {
 }
 ```
 
-In the above example. We call `this.user.unregister('change:title', this.showAlert);` in the method `removeUser` to pass the compiler check. We pass the compiler check because the class's methods is now balanced. There is one add method and one sub method on the class.
+In the above example. We call `this.user.unregister('change:title', this.showAlert);` in the method `removeUser` to pass the compiler check. We pass the compiler check because the class's methods is now balanced. There is one add method and one sub method on the class. 
+
+## Balance
+
+To achieve balance either a scope needs to be balanced or a class's methods neeed to be balanced. A balanced scope, means that there is a sub method balancing an add method. A balanced class, means that there exists a corresponding sub method for an add method.
+
+Target | Elements | Balance
+--- | --- | ---
+Class| Methods | For every add method there must exist a corresponding sub method.
+Scope | Call expressions | Fore every call expression for an add method there must exist a corresponding a sub method call expression.
 
 ## Inheritance
 
@@ -203,14 +214,16 @@ class View<M> {
 }
 ```
 
-The methods in our class is now balanced. This leads us to our second rule. A class's methods needs to be balanced. A balanced class has two methods of which one of them having an add method and another having a corresponding sub method. And when a class is balanced it implicitly infers that the a balance check should be done in an another scope other than in the current class's methods. This could be inside an another class's method that uses the current class's add method.
+The methods in our class is now balanced. When a class is balanced it implicitly infers that the a balance check should be done in an another scope other than in the current class's methods. This could be inside an another class's method that uses the current class's add method.
 
 Now, let use the above class in an another class we call `SubView`:
 
 ```ts
 class SubView {
-    show() {
-        this.subView = new View(this.user); // This call is an add method
+    private view: View;
+    
+    public show() {
+        this.subView = new View(this.user); // Add method(constructor).
         this.subView = null;
     }
 }
@@ -218,12 +231,14 @@ class SubView {
 
 The above code does not pass the compiler check, because there is no matching sub method. Also the code causes a memory leak.
 
-We can add the call the expression `this.view.removeUser()` below, to match our add method. Now, on the same scope we have a matching add and sub methods. So the compiler will compile the following code. Also, the code, causes no memory leaks:
+We can add the call expression `this.view.removeUser()` below, to match our add method. Now, on the same scope we have a matching add and sub methods. So the compiler will compile the following code. Also, the code, causes no memory leaks:
 
 ```ts
-class SuperView {
-    show() {
-        this.view = new View(this.user); // Add constructor.
+class SubView {
+    private view: View;
+    
+    public show() {
+        this.view = new View(this.user); // Add method(constructor).
         this.view.removeUser(); // Sub method.
         this.view = null;
     }
@@ -234,9 +249,11 @@ If we don't add a sub method call above. The containing method will be classifie
 
 ```ts
 class SubView {
+    private view: View;
+    
 	// add UserChangeTitleCallback
-    show() {
-        this.view = new View(this.user); // Turns the toggle on.
+    public show() {
+        this.view = new View(this.user); // Add method.
         this.view = null;
     }
 }
@@ -248,10 +265,22 @@ The method `show` inherited the `add` classification from the expression `new Vi
 
 We have so far only considered object having an instant death. And this is not so useful. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler checks will pass. Now, this leads us to our next rule:
 
-Passing a sub method method as a callback argument will balance an add method in current scope:
+```
+Passing a sub method method as a callback argument will balance an add method in current scope.
+```
+And we would need to also update our balance table:
+
+Target | Elements | Balance
+--- | --- | ---
+Class| Methods | For every add method there must exist a corresponding sub method.
+Scope | Call expressions | Fore every call expression for an add method there must exist a corresponding a sub method call expression or a call expression that has passed an argument of a corresponding sub method.
+
+Lets go ahead and add our call expression, that accepts a corresponding sub method for our add method:
 
 ```ts
 class SubView {
+    private view: View;
+    
     public show() {
         this.view = new View(this.user); // Add method.
 		this.onDestroy(this.remove); // Passing a sub method to a call expression matches the add method above.
@@ -268,17 +297,21 @@ class SubView {
 	}
 }
 ```
-Now, we have ensured a possible death of our `view`, because `this.remove` has an inherited a `sub` classification:
+
+Now, we have ensured a possible death of our `view`, because the method `remove` has an inherited a `sub` classification. So `this.remove` is callback that corresponed to the add method(constructor) `new View(this.user)`:
+
 ```ts
-	this.subView = new View(this.user); // Add method.
-	this.onDestroy(this.remove); // `this.onDestroy` takes a callback. And we passed in a sub method. Which mean we have a possible death for our `subView`.
+	this.subView = new View(this.user); // Add method(constructor).
+	this.onDestroy(this.remove); // 
 ```
 
-The scope is balanced and the compiler will not complain. Notice, whenever an add method is balanced with a sub method directly or whenever there is a path(call path) that can be reached, to balance a sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
+`this.onDestroy` takes a callback. And we passed in a corresponding sub method for our add method above. Which means, we have a possible death for our `subView`. The scope is balanced and the compiler will not complain. Notice, whenever an add method is balanced with a sub method directly or whenever there is a path(call path) that can be reached, to balance a sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
+
 ```
 BIRTH ---> DEATH
 BIRTH ?---> CALL1 ---> CALL2 ---> CALLN ---> DEATH
 ```
+
 Notice, that we say a possible death and not a certain death. This is because it is sometimes upto the business logic to decide when these callbacks should be called or not. Just take our `onDestroy` method in our `SubView` class:
 
 ```ts
@@ -412,6 +445,12 @@ export class User extends EventEmitter {
     public eventCallbacks: EventCallbacks = {}
 }
 ```
+
+The expression:
+```ts
+balance EventCallbacks[event] as EventCallback
+```
+indicates that only elements added/subtracted to `eventCallbacks[event]`(and not `eventCallbacks`) will be considered.
 
 Notice, also when we now have an annotation for the storage. We don't need to classify methods with `add|sub NAME` anymore. Though, you still need to alias some call expressions with `add|sub NAME as ALIAS` to prevent name collisions.
 
