@@ -224,8 +224,8 @@ class SubView {
     private view: View;
     
     public show() {
-        this.subView = new View(this.user); // Add method(constructor).
-        this.subView = null;
+        this.view = new View(this.user); // Add method(constructor).
+        this.view = null;
     }
 }
 ```
