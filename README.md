@@ -415,10 +415,11 @@ So for loops, whether it is a while loop or a for loop that can loop at least mo
 
 <pre>
 If in a loop, and the loop only loops once:
-<i>&emsp;&emsp;Balance can be reached if in one branch has an add method and a sub method.</i>
-<i>&emsp;&emsp;Balance can be reached, if one branch has an add method and another branch has a sub method, only if the add method and submethod branch is both being entered and the add method branch is entered before the sub method branch. </i>
+<i>&emsp;&emsp;Balance can be reached if in one branch has an add method call and a sub method call.</i>
+<i>&emsp;&emsp;Balance can be reached, if one branch has an add method call and another branch has a sub method call, only if the add method and sub method branch is both being entered and the add method branch is entered before the sub method branch. </i>
 
 If in a loop, and the loop loops twice or more:
+<i>&emsp;&emsp;Balance can be reached if in one branch has an add method call and a sub method call.</i>
 <i>&emsp;&emsp;Balance can be reached if in one branch has an add method and another branch has a sub method.</i>
 </pre>
 
