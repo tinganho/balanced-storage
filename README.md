@@ -196,7 +196,7 @@ Scope | Call expressions | Fore every call expression for an add method there mu
 Notice first, that whenever there is a scope with an unmatched add or sub methods. The unmatched methods classifies the containing method. Here we show the inherited classification in the comments below:
 
 ```ts
-class View<M> {
+class View {
     private description = 'This is the view of: ';
     
     // add UserChangeTitleCallback
