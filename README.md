@@ -294,11 +294,11 @@ class SubView {
 Now, we have ensured a possible death of our `view`, because the method `remove` has inherited a `sub` classification. So `this.remove` is a callback that corresponed to the add method(constructor) `new View(this.user)`:
 
 ```ts
-	this.subView = new View(this.user); // Add method(constructor).
+	this.view= new View(this.user); // Add method(constructor).
 	this.onDestroy(this.remove); // 
 ```
 
-`this.onDestroy` takes a callback. And we passed in a corresponding sub method for our add method above. Which means, we have a possible death for our `subView`. The scope is balanced and the compiler will not complain. Notice, whenever an add method is balanced with a sub method directly or whenever there is a path(call path) that can be reached, to balance a sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
+`this.onDestroy` takes a callback. And we passed in a corresponding sub method for our add method above. Which means, we have a possible death for our `view`. The scope is balanced and the compiler will not complain. Notice, whenever an add method is balanced with a sub method directly or whenever there is a path(call path) that can be reached, to balance a sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
 
 ```
 BIRTH ---> DEATH
