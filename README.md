@@ -702,7 +702,7 @@ Because we don't need to deal with an even more complex matching of add-sub meth
 For various reason, if one cannot use balanced methods/constructors. The classifications conventions works as before. An unmatched add or sub method call annotates the containing method. Even on a for loop below:
 
 ```typescript
-class SuperView {
+class SubView {
 	private views: View[] = [];
 	
 	// add UserChangeTitleCallback
@@ -738,22 +738,22 @@ Now, our whole class will look like this:
 
 ```typescript
 class SubView {
-    private subViews: View[] = [];
+    private views: View[] = [];
     
 	// add UserChangeTitleCallback
-    showSubViews() {
+    public show() {
 		for (let i = 0; i < 10; i++) {
 		    add UserChangeTitleCallback as UserChangeTitleCallbacks
         	this.views.push(new View(this.user));
 		}
     }
 
-    onDestroy(callback: () => void) {
+    private onDestroy(callback: () => void) {
         this.deleteAllButton.addEventListener(callback); 
     }
 
 	// sub UserChangeTitleCallbacks
-	removeSubViews() {
+	public remove() {
 		for (let i = 0; i < 10; i++) {
 		    sub UserChangeTitleCallback as UserChangeTitleCallbacks
         	this.views[i].removeUser();
