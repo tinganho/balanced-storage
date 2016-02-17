@@ -291,7 +291,7 @@ class SubView {
 }
 ```
 
-Now, we have ensured a possible death of our `view`, because the method `remove` has inherited a `sub` classification. So `this.remove` is a callback that corresponed to the add method(constructor) `new View(this.user)`:
+Now, we have ensured a possible death of our `view`, because the method `remove` has inherited a `sub` classification. So `this.remove` is a callback that corresponds to the add method(constructor) `new View(this.user)`:
 
 ```ts
 	this.view= new View(this.user); // Add method(constructor).
@@ -392,7 +392,7 @@ And we can choose an option for adding one item:
     }
 ```
 
-Or we can choose an option for deleting one item:
+The compiler will not compile the above code. Since we have not used the sub method `storage.deleteItem`.  Let us define that option too:
 
 ```c++
     else if(answer == '2') {
@@ -405,7 +405,7 @@ Or we can choose an option for deleting one item:
 
 Now, if we consider our while loop, looping infinite of time. And according to Murphys law, whatever can happen, will happen. we can derive that what eventually gets added to our storage must eventually be deleted. 
 
-Though looping infinite of times is not a requirement for reaching a balance. The requirement is just looping at least once or twice(more on this later). Because then an added item have a possibility of being subtracted. Which is our definition of balance in a scope.
+Though looping infinite of times is not a requirement for reaching a balance. The requirement is just looping at least once or twice(more on this later). Because then an added item have a possibility of being subtracted. Which corresponds to our definition of reaching balance in a scope.
 
 ![Loop Path of an Object](https://gitlab.com/tinganho/balanced-storage/raw/master/LoopPath@2x.jpg)
 
@@ -519,6 +519,10 @@ int main ()
 }
 
 ```
+
+## Multiple References
+
+
 
 ## Aliasing
 
