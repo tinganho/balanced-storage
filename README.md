@@ -1010,7 +1010,7 @@ We only considered a hash map so far. Though any type that can grow the heap can
 
 When we arrived at our final syntax. We discovered that we could annotate a property and let static analysis discover our toggle methods. Let us illustrate what this means:
 
-When we have a memory leak. Essentially what it means is that our heap object graph can grow to an infinite amount of nodes, starting from some node (we use a tree instead of a graph below):
+When we have a memory leak. Essentially what it means is that our heap object graph can grow to an infinite amount of nodes, starting from some node:
 
 ![Heap object infinity nodes](https://raw.githubusercontent.com/tinganho/balanced-storage/master/HeapObjectGraphInfinity%402x.png)
 
