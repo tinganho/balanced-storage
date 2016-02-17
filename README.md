@@ -1015,4 +1015,4 @@ When we have a memory leak. Essentially what it means is that our heap object gr
 
 And we want to statically annotate that any consumer of this node needs to call an add and sub methods:
 
-![Heap object infinity with on and off toggles](https://raw.githubusercontent.com/tinganho/balanced-storage/master/HeapObjectGraphTwoNodes%402x.png)
+![Heap object infinity with on and off toggles](https://raw.githubusercontent.com/tinganho/balanced-storage/master/HeapObjectGraphBalanced%402x.png)
