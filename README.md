@@ -297,7 +297,7 @@ class SubView {
 Now, we have ensured a possible death of our `view`, because the method `remove` has inherited a `sub` classification. So `this.remove` is a callback that corresponds to the add method(constructor) `new View(this.user)`:
 
 ```ts
-	this.view= new View(this.user); // Add method(constructor).
+	this.view = new View(this.user); // Add method(constructor).
 	this.onDestroy(this.remove); // 
 ```
 
