@@ -70,7 +70,7 @@ Then in some other class's method we instantiate the view with a referenced user
 
 ```ts
 class SubView {
-    show() {
+    public show() {
         this.view = new View(this.user);
         this.view = null; // this.user persists.
         // A memory leak, `view` cannot be garbage collected.
