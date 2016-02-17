@@ -411,7 +411,7 @@ Now, if we consider our while loop, looping infinite of time. And according to M
 
 Though looping infinite of times is not a requirement for reaching a balance. The requirement is just looping at least once or twice(more on this later). Because then an added item have a possibility of being subtracted. Which corresponds to our definition of reaching balance in a scope.
 
-![Loop Path of an Object](https://gitlab.com/tinganho/balanced-storage/raw/master/LoopPath@2x.jpg)
+![Loop Path of an Object](https://raw.githubusercontent.com/tinganho/balanced-storage/master/LoopPath%402x.png)
 
 In the first loop it can enter a branch, which an element gets added. In the second loop or any subsequent loops it can enter a branch where it gets deleted. It can also enter a branch or two branches where an elements gets created and destroyed at the same loop.
 
