@@ -85,7 +85,7 @@ this.user.on('change:title', () => {
 });
 ```
 
-As the comment says, `this` inside the closure is referencing  the view. So `this.user` is referencing `view`. Because the reference count haven't reached zero, the garbabge collector cannot garbage collect the sub view.
+As the comment says, `this` inside the closure is referencing  the view. So `this.user` is referencing `view`. Because the reference count haven't reached zero, the garbabge collector cannot garbage collect the view.
 
 # Add-Sub Method Classification
 
