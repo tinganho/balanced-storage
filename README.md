@@ -15,6 +15,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Inheritance](#inheritance)
   * [Call Paths](#call-paths)
   * [Loop Paths](#loop-paths)
+  * [Auto Aliasing](#auto-aliasing)
   * [Aliasing](#aliasing)
   * [Multiple Simultaneous Addition And Subtraction of Objects](#multiple )
   * [Initialization and Deallaction](#initialization-and-deallocation)
