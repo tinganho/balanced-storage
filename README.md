@@ -10,7 +10,6 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Definition](#definition)
   * [Example](#example) 
 * [Balanced Storage](#balanced-storage)
-  * [Balance](#balance)
   * [Method Classification](#method-classification)
   * [Inheritance](#inheritance)
   * [Call Paths](#call-paths)
