@@ -610,7 +610,7 @@ If you have two reference to two separate store you would not have balance, if y
 
 We some times, need to deal with multiple references of the same class of objects. The compiler will not pass the code if there is two classifications that have the same name. This is because we want to associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
 
-In order to satisfy our compiler we would need to give our classifications some aliases. And the syntax for aliasing a classification is:
+In order to satisfy our compiler we would need to give our classifications some aliases. And the syntax for aliasing a method classification is:
 <pre>
 <i>AddSubAliasClassification ::</i>
 &emsp;&emsp;<b>add</b> | <b>sub</b> <i>Name</i> <b>as</b> <i>Alias CallExpression</i>
@@ -680,6 +680,29 @@ this.anotherView = new View(this.user); // Add method.
 ```
 
 So in other words, The above code will compile. It also causes no memory leaks.
+
+## Auto Aliasing
+
+One could also resolve the name collisioning simple by looking at the assignment.
+
+For our add method we got the following code:
+```ts
+add UserChangeTitleEventCallback as UserChangeTitleCallbackOnAnotherView
+this.anotherView = new View(this.user); // Add method.
+```
+We could just have written:
+```ts
+this.anotherView = new View(this.user); // Add method.
+```
+And look at the assign property `this.anotherView` to match a corresponding sub method call.
+
+Because we assign to `this.anotherView` any kind of submethod classification must call a submethod on `this.anotherView`. And that is exactly what s done in our example:
+
+```ts
+this.anotherView.removeUser(); // Sub method.
+```
+
+Auto-aliasing helps make code less bloat. Also a programming language designer can skip having any aliasing at all and only have everything auto aliasing.
 
 ### Multiple Simultaneous Addition And Subtraction of Objects
 
