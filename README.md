@@ -724,8 +724,8 @@ Our general concept so far, is that for every method for addition of objects, th
 For the add-sub methods the following holds true:
 
 ```
-Add methods: Adds elements.
-Sub methods: Subtracts elements.
+Add methods: Adds (1) elements to the storage.
+Sub methods: Subtracts (1) elements to the storage.
 ```
 
 And let it be our definitions for our add-sub methods for our case.
