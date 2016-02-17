@@ -832,8 +832,6 @@ We also need a definition for what a balance scope is.
 Balance is reached whenever there is a possibility that one or more sub methods being called for one corresponding add method.
 ```
 
-A programming language designer can decide whatever strictness of a balance definition he wants. Though a more strict balance definition might yield a less productive programming langauge. In our balance scope definition, we choose the most strict one.
-
 ### Syntax
 
 We also want to introduce a new syntax to annotate a storage:
