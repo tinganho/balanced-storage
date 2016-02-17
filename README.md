@@ -9,7 +9,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
 * [Memory Leaks](#memory-leaks)
   * [Definition](#definition)
   * [Example](#example) 
-* [Add-Sub Method Classification](#add-sub-method-classification)
+* [Balanced Storage](#balanced-storage)
   * [Balance](#balance)
   * [Method Classification](#method-classification)
   * [Inheritance](#inheritance)
@@ -19,7 +19,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Initialization and Deallaction](#initialization-and-deallocation)
   * [Control Flow Analysis](#control-flow-analysis)
   * [Weak Balance](#weak-balance)
-  * [Balanced Storage Annotation](#balanced-storage-annotation)
+  * [Annotation](#annotation)
     * [Add-Sub Method Definition](#add-sub-method-definition)
     * [Syntax](#syntax)
     * [Add Method Example](#add-method-example)
@@ -707,7 +707,7 @@ int main ()
 
 If an add method is called and a corresponding sub method needs to be called. Due to branching above, a logic can reach a branch where the sub method is never being called. We consider cases such as this, for *weak balance*.
 
-## Balanced Storage Annotation
+## Annotation
 
 One could ask why not annotating the source of the memory leak directly instead of classifying the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class:
 
