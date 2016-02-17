@@ -16,6 +16,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Call Paths](#call-paths)
   * [Loop Paths](#loop-paths)
   * [Aliasing](#aliasing)
+  * [Multiple Simultaneous Addition And Subtraction of Objects](#multiple )
   * [Initialization and Deallaction](#initialization-and-deallocation)
   * [Control Flow Analysis](#control-flow-analysis)
   * [Weak Balance](#weak-balance)
@@ -680,7 +681,7 @@ this.anotherView = new View(this.user); // Add method.
 
 So in other words, The above code will compile. It also causes no memory leaks.
 
-### Multiple Simultaneos Addition and Subtraction of Object
+### Multiple Simultaneous Addition And Subtraction of Objects
 
 When dealing with multiple simultaneous addition or subtraction of objects, it is good practice to have already balanced method calls on constructors or methods.
 
