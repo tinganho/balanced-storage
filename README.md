@@ -16,6 +16,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Call Paths](#call-paths)
   * [Loop Paths](#loop-paths)
   * [Aliasing](#aliasing)
+  * [Initialization and Deallaction](#initialization-and-deallocation)
   * [Control Flow](#control-flow)
   * [Balanced Storage Annotation](#balanced-storage-annotation)
     * [Add-Sub Method Definition](#add-sub-method-definition)
@@ -520,9 +521,53 @@ int main ()
 
 ```
 
-## Multiple References
+## Initialization and Deallocation of Objects
+
+In C++ we initialize with `new` and deallocate objects with `delete`. Our balanced storage definition so far have only considered array and lists as data types. The question is, if we can apply some balancing rules here too fight memory leaks? And it turns out that we can.
+
+`new` in C++ will be considered an add method. `delete` will be considered a sub method.
+
+First example is the most simpliest one:
+
+```c++
+int main ()
+{
+    auto item = new Item {"glasses"};
+    delete item;
+}
+```
+
+`Item` is the same from our previous examples. We allocated and initialize it and delete it. And we have a balanced scope inside `main`.
+
+For more complex rules for loop paths and call paths, where balancing is considering branches and methods. The same rules applies for initialization and deallocation.
 
 
+## Multiple Referenced Store
+
+You can have two reference to the same storage instnace:
+
+```c++
+Storage* storage = new Storage();
+void addToStorage(Item* item)
+{
+    storage->addItem(item);
+}
+
+void deleteFromStorage(Item* item)
+{
+    storage->deleteItem(item);
+}
+
+int main ()
+{
+    auto item = new Item {"hej"};
+    Storage* tmpStorage = storage;
+    tmpStorage->addItem(item);
+    storage->deleteItem(item);
+    tmpStorage->showItems();
+    delete item;
+}
+```
 
 ## Aliasing
 
@@ -599,6 +644,10 @@ this.anotherView = new View(this.user); // Add method.
 
 So in other words, The above code will compile. It also causes no memory leaks.
 
+## Control Flow Analysis
+
+A control flow anlysis needs to be done by a compiler to check against that a add method is being called before a corresponding sub method. It would probably break or cause a leakage if a sub method is called before its corresponding add method.
+
 ## Balanced Storage Annotation
 
 One could ask why not annotating the source of the memory leak directly instead of classifying the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class:
@@ -625,9 +674,11 @@ And let it be our definitions for our add-sub methods for our case.
 ### Balance Scope Definition
 
 We also need a definition for what a balance scope is.
+
 ```
-An added element eventually gets subtracted.
+An added element have a possibility of getting subtracted.
 ```
+
 A programming language designer can decide whatever strictness of a balance definition he wants. Though a more strict balance definition might yield a less productive programming langauge. In our balance scope definition, we choose the most strict one.
 
 ### Syntax
