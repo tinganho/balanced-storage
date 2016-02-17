@@ -689,6 +689,7 @@ import { View } from './view';
 
 class SubView {
 	private views: View[] = [];
+	
     public show() {
 		for (let i = 0; i < 10; i++) {
         	this.views.push(new View(this.user)); // The constructor is already balanced. So the compiler will not complain.
@@ -697,7 +698,7 @@ class SubView {
 }
 ```
 
-Because we don't need to deal with an even more complex matching of add-sub methods.
+Because we don't need to deal with an even more complex balancing of add-sub methods.
 
 For various reason, if one cannot use balanced methods/constructors. The classifications conventions works as before. An unmatched add or sub method call annotates the containing method. Even on a for loop below:
 
