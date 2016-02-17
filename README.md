@@ -1012,8 +1012,8 @@ When we arrived at our final syntax. We discovered that we could annotate a prop
 
 When we have a memory leak. Essentially what it means is that our heap object graph can grow to an infinite amount of nodes, starting from some node (we use a tree instead of a graph below):
 
-![Heap object infinity nodes](https://raw.githubusercontent.com/tinganho/a-toggle-modifier-proposal/master/HeapObjectTreeHorizontalInfinity%402x.jpg)
+![Heap object infinity nodes](https://raw.githubusercontent.com/tinganho/balanced-storage/master/HeapObjectGraphInfinity%402x.png)
 
 And we want to statically annotate that any consumer of this node needs to call an add and sub methods:
 
-![Heap object infinity with on and off toggles](https://gitlab.com/tinganho/balanced-storage/raw/master/HeapObjectTreeHorizontalOnOff@2x.jpg)
+![Heap object infinity with on and off toggles](https://raw.githubusercontent.com/tinganho/balanced-storage/master/HeapObjectGraphTwoNodes%402x.png)
