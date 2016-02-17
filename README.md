@@ -17,7 +17,8 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Loop Paths](#loop-paths)
   * [Aliasing](#aliasing)
   * [Initialization and Deallaction](#initialization-and-deallocation)
-  * [Control Flow](#control-flow)
+  * [Control Flow Analysis](#control-flow-analysis)
+  * [Weak Balance](#weak-balance)
   * [Balanced Storage Annotation](#balanced-storage-annotation)
     * [Add-Sub Method Definition](#add-sub-method-definition)
     * [Syntax](#syntax)
@@ -357,7 +358,7 @@ public:
 };
 ```
 
-The compiler will statically classify `addItem` is an add method and `deleteItem` is a sub method.
+The compiler will statically classify `addItem` is an add method and `deleteItem` is a sub method. We will cover the details later.
 
 We then have while loop that ask us our options:
 
@@ -523,9 +524,9 @@ int main ()
 
 ## Initialization and Deallocation of Objects
 
-In C++ we initialize with `new` and deallocate objects with `delete`. Our balanced storage definition so far have only considered array and lists as data types. The question is, if we can apply some balancing rules here too fight memory leaks? And it turns out that we can.
+In C++ we initialize with `new` and deallocate objects with `delete`. Our balanced storage definition so far have only considered collections as data types. The question is, if we can apply the same balancing rules here too fight memory leaks? And it turns out that we can.
 
-`new` in C++ will be considered an add method. `delete` will be considered a sub method.
+`new` in C++ will be considered as an add method. `delete` will be considered as a sub method.
 
 First example is the most simpliest one:
 
@@ -539,8 +540,41 @@ int main ()
 
 `Item` is the same from our previous examples. We allocated and initialize it and delete it. And we have a balanced scope inside `main`.
 
-For more complex rules for loop paths and call paths, where balancing is considering branches and methods. The same rules applies for initialization and deallocation.
+For more complex rules for loop paths and call paths, where balancing is considering branches and methods. The same rules applies for initialization and deallocation. 
 
+Lets consider our storage class again:
+
+```c++
+class Storage {
+public:
+    vector<Item*> items;
+    
+    Storage(): items { new Item { "eyeglasses" } } {}
+    
+    void addItem(string name) {
+        items.push_back(new Item {name});
+    }
+    
+    void deleteItem(int index) {
+        auto item = items.begin() + index;
+        objects.erase(item);
+        delete *item;
+    }
+};
+```
+We have an initialization statement on our add method:
+
+```c++
+items.push_back(new Item {name});
+```
+
+Because it is referenced to an index in `items`, our delete method also need to reference to an index in `items` in order to reach balance. And that is exactly what we do:
+
+```c++
+auto item = items.begin() + index;
+objects.erase(item);
+delete *item;
+```
 
 ## Multiple Referenced Store
 
@@ -560,7 +594,7 @@ void deleteFromStorage(Item* item)
 
 int main ()
 {
-    auto item = new Item {"hej"};
+    auto item = new Item {"glasses"};
     Storage* tmpStorage = storage;
     tmpStorage->addItem(item);
     storage->deleteItem(item);
@@ -568,6 +602,8 @@ int main ()
     delete item;
 }
 ```
+
+If you have two reference to two separate store you would not have balance, if you called the add method on one, and the delete method on the other.
 
 ## Aliasing
 
@@ -648,6 +684,29 @@ So in other words, The above code will compile. It also causes no memory leaks.
 
 A control flow anlysis needs to be done by a compiler to check against that a add method is being called before a corresponding sub method. It would probably break or cause a leakage if a sub method is called before its corresponding add method.
 
+## Weak Balance
+
+Consider following code:
+```c++
+int main ()
+{
+    auto item = new Item {"glasses"};
+    storage->addItem(item);
+    if (something) {
+        ...
+    }
+    else if (somethingElse) {
+        storage->deleteItem(item);
+    }
+    else {
+        ...
+    }
+    delete item;
+}
+```
+
+If an add method is called and a corresponding sub method needs to be called. Due to branching above, a logic can reach a branch where the sub method is never being called. We consider cases such as this, for *weak balance*.
+
 ## Balanced Storage Annotation
 
 One could ask why not annotating the source of the memory leak directly instead of classifying the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class:
@@ -676,7 +735,7 @@ And let it be our definitions for our add-sub methods for our case.
 We also need a definition for what a balance scope is.
 
 ```
-An added element have a possibility of getting subtracted.
+Balance is reached whenever there is a possibility that one or more sub methods being called for one corresponding add method.
 ```
 
 A programming language designer can decide whatever strictness of a balance definition he wants. Though a more strict balance definition might yield a less productive programming langauge. In our balance scope definition, we choose the most strict one.
