@@ -680,6 +680,100 @@ this.anotherView = new View(this.user); // Add method.
 
 So in other words, The above code will compile. It also causes no memory leaks.
 
+### Multiple Simultaneos Addition and Subtraction of Object
+
+When dealing with multiple simultaneous addition or subtraction of objects, it is good practice to have already balanced method calls on constructors or methods.
+
+```typescript
+import { View } from './view';
+
+class SubView {
+	private views: View[] = [];
+    public show() {
+		for (let i = 0; i < 10; i++) {
+        	this.views.push(new View(this.user)); // The constructor is already balanced. So the compiler will not complain.
+		}
+    }
+}
+```
+
+Because we don't need to deal with an even more complex matching of add-sub methods.
+
+For various reason, if one cannot use balanced methods/constructors. The classifications conventions works as before. An unmatched add or sub method call annotates the containing method. Even on a for loop below:
+
+```typescript
+class SuperView {
+	private views: View[] = [];
+	
+	// add UserChangeTitleCallback
+    public show() {
+		for (let i = 0; i < 10; i++) {
+		    add UserChangeTitleCallback as UserChangeTitleCallbacks
+        	this.views.push(new View(this.user));
+		}
+    }
+}
+```
+
+As before, we would need to have a matching sub method to satisfy our compiler:
+
+```typescript
+class SubView {
+	private views: View[] = [];
+	
+	// sub UserChangeTitleCallbacks
+	public remove() {
+		for (let i = 0; i < 10; i++) {
+		    sub UserChangeTitleCallback as UserChangeTitleCallbacks
+        	this.views[i].removeUser();
+		}
+		this.views = [];
+    }
+}
+```
+
+In the above example, `this.views[i].removeUser();` is a sub method and since there are no add method that balances it. It annotates the containing method `remove`.
+
+Now, our whole class will look like this:
+
+```typescript
+class SubView {
+    private subViews: View[] = [];
+    
+	// add UserChangeTitleCallback
+    showSubViews() {
+		for (let i = 0; i < 10; i++) {
+		    add UserChangeTitleCallback as UserChangeTitleCallbacks
+        	this.views.push(new View(this.user));
+		}
+    }
+
+    onDestroy(callback: () => void) {
+        this.deleteAllButton.addEventListener(callback); 
+    }
+
+	// sub UserChangeTitleCallbacks
+	removeSubViews() {
+		for (let i = 0; i < 10; i++) {
+		    sub UserChangeTitleCallback as UserChangeTitleCallbacks
+        	this.views[i].removeUser();
+		}
+		this.views = [];
+    }
+}
+```
+
+Note, there is no compile error, even though the number of loops in `remove` is not matched with `show`. Like for instance, we could have only 9 loops instead of 10:
+
+```typescript
+for (let i = 0; i < 9; i++) {// Loop only 9 elements and not 10 causes another memory leak.
+	off UserChangeTitleCallback as UserChangeTitleCallbacks
+	this.subView[i].removeUser();
+}
+```
+
+This is because it is very difficult to do that kind of assertion. A compiler cannot know the business logic of your application and thus cannot make that assertion. Notice, that adding multiple objects simultaneously and at least having a method of subtracting them, even though the the subtraction methods only subtracts one from the storage. It still satisfy our balance definition. Any objects added can eventually be subtracted.
+
 ## Control Flow Analysis
 
 A control flow anlysis needs to be done by a compiler to check against that a add method is being called before a corresponding sub method. It would probably break or cause a leakage if a sub method is called before its corresponding add method.
