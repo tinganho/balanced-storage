@@ -912,7 +912,7 @@ balance EventCallbacks[event] as EventCallback
 ```
 indicates that only elements added/subtracted to `eventCallbacks[event]`(and not `eventCallbacks`) will be considered.
 
-Notice, also when we now have an annotation for the storage. We don't need to classify methods with `add|sub NAME` anymore. Though, you still need to alias some call expressions with `add|sub NAME as ALIAS` to prevent name collisions.
+Notice, also when we now have an annotation for the storage. We don't need to classify methods with `add|sub NAME` anymore.
 
 ### Add Method Example
 
