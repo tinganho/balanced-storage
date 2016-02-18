@@ -363,7 +363,7 @@ public:
 
 The compiler will statically classify `addItem` is an add method and `deleteItem` is a sub method. We will cover the details later.
 
-We then have while loop that ask us our options:
+We have while loop that ask us our options:
 
 ```c++
 while (true) {
