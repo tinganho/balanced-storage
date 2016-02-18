@@ -607,6 +607,27 @@ int main ()
 
 If you have two reference to two separate store you would not have balance, if you called the add method on one, and the delete method on the other.
 
+## Multiple Referenced Objects
+
+Svereal stores can also add the same objects, as long as balance is made.
+
+```c++
+Storage* storage1 = new Storage();
+Storage* storage2 = new Storage();
+
+int main ()
+{
+    auto item = new Item {"glasses"};
+    storage1->addItem(item);
+    storage1->deleteItem(item);
+    storage2->addItem(item);
+    storage2->deleteItem(item);
+    delete item;
+}
+```
+
+Notice that, each `addItem` call needs to match with `deleteItem` on each store.
+
 ## Aliasing
 
 We some times, need to deal with multiple references of the same class of objects. The compiler will not pass the code if there is two classifications that have the same name. This is because we want to associate one type of allocation/deallocation of resource with one identifier. This will make code more safe, because one type of allocation cannot be checked against another type of deallocation.
@@ -704,7 +725,7 @@ this.anotherView.removeUser(); // Sub method.
 ```
 
 Auto-aliasing helps make code less bloat. Also a programming language designer can skip having any aliasing at all and only have everything auto aliasing.
-## Multiple 
+
 ## Multiple Simultaneous Addition And Subtraction of Objects
 
 When dealing with multiple simultaneous addition or subtraction of objects, it is good practice to have already balanced method calls on constructors or methods.
