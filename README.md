@@ -26,7 +26,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
     * [Sub Method Example](#sub-method-example)
     * [False Add-Sub Method Example](#false-add-sub-method-example)
   * [Heap Object Graph](#heap-object-graph)
-* [Conclusions](#conclusions)
+* [Conclusion](#conclusion)
 
 # Memory Leaks
 
@@ -942,6 +942,6 @@ And we want to statically annotate that any consumer of this node needs to call 
 
 ![Heap object infinity with on and off toggles](https://raw.githubusercontent.com/tinganho/balanced-storage/master/HeapObjectGraphBalanced%402x.png)
 
-# Conclusions
+# Conclusion
 
 We have showed that using balancing of add and sub methods can provide a powerful way of checking applications are not leaking memory. Though it remains to be implemented and tested on a real programming language.
