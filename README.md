@@ -270,7 +270,7 @@ The method `show` inherited the `add` classification from the expression `new Vi
 We have so far only considered object having an instant death. And this is not so useful. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler checks will pass. Now, this leads us to our next rule:
 
 ```
-Passing a sub method method as a callback argument will balance an add method in current scope.
+Passing a sub method as an argument to a call expression will balance an add method in current scope.
 ```
 
 Lets go ahead and add our call expression, that accepts a corresponding sub method for our add method:
