@@ -16,7 +16,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Loop Paths](#loop-paths)
   * [Auto Aliasing](#auto-aliasing)
   * [Aliasing](#aliasing)
-  * [Multiple References To The Same Object](#multiple-references-to-the-same-object)
+  * [Multiple References Objects](#multiple-referenced-objects)
   * [Multiple Simultaneous Addition And Subtraction of Objects](#multiple )
   * [Initialization and Deallaction](#initialization-and-deallocation)
   * [Control Flow Analysis](#control-flow-analysis)
