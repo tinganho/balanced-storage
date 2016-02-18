@@ -500,6 +500,8 @@ int main ()
 
 ```
 
+Notice, for a while loop. In order for it to reach balance, it must loop infinity amount of times. And it needs to contain at least one branch for an add method call and one branch for a sub method call.
+
 ## Initialization and Deallocation of Objects
 
 In C++ we initialize with `new` and deallocate objects with `delete`. Our balanced storage definition so far have only considered collections as data types. The question is, if we can apply the same balancing rules too prevent memory leaks? And it turns out that we can.
