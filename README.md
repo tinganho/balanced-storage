@@ -18,7 +18,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Aliasing](#aliasing)
   * [Multiple Referenced Objects](#multiple-referenced-objects)
   * [Simultaneous Addition And Subtraction of Objects](#simultaneous-addition-and-subtraction-of-objects)
-  * [Initialization and Deallaction](#initialization-and-deallocation)
+  * [Initialization and Deallocation](#initialization-and-deallocation)
   * [Control Flow Analysis](#control-flow-analysis)
   * [Weak Balance](#weak-balance)
   * [Annotation](#annotation)
