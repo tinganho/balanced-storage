@@ -188,20 +188,12 @@ class View {
 
 In the above example. We call `this.user.unregister('change:title', this.showAlert);` in the method `removeUser` to pass the compiler check. We pass the compiler check because the class's methods is now balanced. There is one add method declaration and one corresponding sub method declaration in the class. 
 
-To achieve balance either a scope needs to be balanced or a class's methods neeed to be balanced. A balanced scope, means that there is a certainty that a sub method being called to match a corresponding add method call given infinite amount of time. A balanced class, means that there exists a corresponding sub method declaration for an add method declaration.
+To achieve balance either a scope needs to be balanced or a class's methods neeed to be balanced. A balanced scope, means that given infinite amount of time, there is a certainty that a sub method being called to match a corresponding add method call. A balanced class, means that there exists a corresponding sub method declaration for an add method declaration.
 
 Target | Elements | Balance
 --- | --- | ---
 Class | Methods | For every add method declaration there must exist a corresponding sub method declaration.
 Scope | Call expressions | Given infinite amount of time, one added resource eventually get subtracted.
-
-### Balance Scope Definition
-
-A balance scope is defined as:
-
-```
-Balance is reached whenever given infinite amount of time one added resource eventually get subtracted.
-```
 
 ## Inheritance
 
