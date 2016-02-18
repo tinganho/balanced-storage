@@ -510,7 +510,7 @@ int main ()
 
 ## Initialization and Deallocation of Objects
 
-In C++ we initialize with `new` and deallocate objects with `delete`. Our balanced storage definition so far have only considered collections as data types. The question is, if we can apply the same balancing rules here too fight memory leaks? And it turns out that we can.
+In C++ we initialize with `new` and deallocate objects with `delete`. Our balanced storage definition so far have only considered collections as data types. The question is, if we can apply the same balancing rules too prevent memory leaks? And it turns out that we can.
 
 `new` in C++ will be considered as an add method. `delete` will be considered as a sub method.
 
@@ -535,7 +535,7 @@ class Storage {
 public:
     vector<Item*> items;
     
-    Storage(): items { new Item { "eyeglasses" } } {}
+    Storage() {}
     
     void addItem(string name) {
         items.push_back(new Item {name});
@@ -548,18 +548,20 @@ public:
     }
 };
 ```
-We have an initialization statement on our add method:
+We have an initialization expression on our add method:
 
 ```c++
 items.push_back(new Item {name});
 ```
 
-Because it is referenced to an index in `items`, our delete method also need to reference to an index in `items` in order to reach balance. And that is exactly what we do:
+Because it is references an index in `items` by `push_back`, our sub method also need to reference an index in `items` in order to reach balance. And that is exactly what we do:
 
 ```c++
-auto item = items.begin() + index;
-objects.erase(item);
-delete *item;
+void deleteItem(int index) {
+    auto item = items.begin() + index;
+    objects.erase(item);
+    delete *item;
+}
 ```
 
 ## Multiple Referenced Store
