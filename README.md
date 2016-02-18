@@ -28,6 +28,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
     * [Sub Method Example](#sub-method-example)
     * [False Add-Sub Method Example](#false-add-sub-method-example)
   * [Heap Object Graph](#heap-object-graph)
+* [Conclusions](#conclusions)
 
 # Memory Leaks
 
