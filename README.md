@@ -827,28 +827,22 @@ This is because it is very difficult to do that kind of assertion. A compiler ca
 
 A control flow anlysis needs to be done by a compiler to check against that a add method is being called before a corresponding sub method. It would probably break or cause a leakage if a sub method is called before its corresponding add method.
 
-## Weak Balance
+## Balance 
 
-Consider following code:
-```c++
-int main ()
-{
-    auto item = new Item {"glasses"};
-    storage->addItem(item);
-    if (something) {
-        ...
-    }
-    else if (somethingElse) {
-        storage->deleteItem(item);
-    }
-    else {
-        ...
-    }
-    delete item;
-}
-```
+If you got one application and the application presents you with two choices you need to make:
 
-If an add method is called and a corresponding sub method needs to be called. Due to branching above, a logic can reach a branch where the sub method is never being called. We consider cases such as this, for *weak balance*.
+1. Add an element.
+2. Delete an element.
+
+If the application only has these two choices. Then we can be certain that whateever gets added will be deleted. And the compiler can be very strict and check that what ever gets added will eventually get deleted. And we call cases such as this for *strong balance*.
+
+Though let say that you now got three choices to make.
+
+1. Add an element.
+2. Delete an element.
+3. Show all elements.
+
+
 
 ## Annotation
 
