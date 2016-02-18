@@ -20,8 +20,6 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Simultaneous Addition And Subtraction of Objects](#simultaneous-addition-and-subtraction-of-objects)
   * [Initialization and Deallocation](#initialization-and-deallocation)
   * [Control Flow Analysis](#control-flow-analysis)
-  * [Balance](#balance)
-  * [Weak Balance](#weak-balance)
   * [Annotation](#annotation)
     * [Add-Sub Method Definition](#add-sub-method-definition)
     * [Syntax](#syntax)
