@@ -185,7 +185,7 @@ class View {
 }
 ```
 
-In the above example. We call `this.user.unregister('change:title', this.showAlert);` in the method `removeUser` to pass the compiler check. We pass the compiler check because the class's methods is now balanced. There is one add method and one sub method on the class. 
+In the above example. We call `this.user.unregister('change:title', this.showAlert);` in the method `removeUser` to pass the compiler check. We pass the compiler check because the class's methods is now balanced. There is one add method and one sub method in the class. 
 
 To achieve balance either a scope needs to be balanced or a class's methods neeed to be balanced. A balanced scope, means that there is a sub method balancing an add method. A balanced class, means that there exists a corresponding sub method for an add method.
 
