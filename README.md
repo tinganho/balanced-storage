@@ -276,7 +276,7 @@ The method `show` inherited the `add` classification from the expression `new Vi
 
 ## Call Paths
 
-We have so far only considered object having an instant death. And this is not so useful. What about objects living longer than an instant? We want to keep the goal whenever an object has a possible death the compiler checks will pass. Now, this leads us to our next rule:
+We have so far only considered object having an instant death. And this is not so useful. What about objects living longer than an instant? We want to keep the goal whenever an object has a certian death (given infinite amont of time) the compiler checks will pass. Now, this leads us to our next rule:
 
 ```
 Passing a sub method as an argument to a call expression will balance an add method in current scope.
@@ -305,29 +305,19 @@ class SubView {
 }
 ```
 
-Now, we have ensured a possible death of our `view`, because the method `remove` has inherited a `sub` classification. So `this.remove` is a callback that corresponds to the add method(constructor) `new View(this.user)`:
+Now, we have ensured a certain death of our `view`, because the method `remove` has inherited a `sub` classification. So `this.remove` is a callback that corresponds to the add method(constructor) `new View(this.user)`:
 
 ```ts
 	this.view = new View(this.user); // Add method(constructor).
 	this.onDestroy(this.remove); // 
 ```
 
-`this.onDestroy` takes a callback. And we passed in a corresponding sub method for our add method above. Which means, we have a possible death for our `view`. The scope is balanced and the compiler will not complain. Notice, whenever an add method is balanced with a sub method directly or whenever there is a path(call path) that can be reached, to balance a sub method. The code will pass the compiler check. Because in other words, we have ensured a possible death of our allocated resource.
+`this.onDestroy` takes a callback. And we passed in a corresponding sub method for our add method above. Which means, we have a possible death for our `view`. The scope is balanced and the compiler will not complain. Notice, whenever an add method is balanced with a sub method directly or whenever there is a path(call path) that can be reached, to balance a sub method. The code will pass the compiler check. Because in other words, we have ensured a certain death of our allocated resource.
 
 ```
 BIRTH ---> DEATH
-BIRTH ?---> CALL1 ---> CALL2 ---> CALLN ---> DEATH
+BIRTH ---> CALL1 ---> CALL2 ---> CALLN ---> DEATH
 ```
-
-Notice, that we say a possible death and not a certain death. This is because it is sometimes upto the business logic to decide when these callbacks should be called or not. Just take our `onDestroy` method in our `SubView` class:
-
-```ts
-onDestroy(callback: () => void) {
-	this.deleteButton.addEventListener(callback); 
-}
-```
-
-We cannot guarantee that the callback is being called. It is upto the end-user to click the delete button. Though we can guarantee that a call path has a path that at the end calls a method that subtracts an element in a balanced storage.
 
 ## Loop Paths
 
@@ -417,25 +407,9 @@ The compiler will not compile the above code. Since we have not used the sub met
     }
 ```
 
-Now, if we consider our while loop, looping infinite of time. And according to Murphys law, whatever can happen, will happen. we can derive that what eventually gets added to our storage must eventually be deleted. 
-
-Though looping infinite of times is not a requirement for reaching a balance. The requirement is just looping at least once or twice(more on this later). Because then an added item have a possibility of being subtracted. Which corresponds to our definition of reaching balance in a scope.
+Now, if we consider our while loop, looping infinite of time. Given infinite amount of time, we can derive that what eventually gets added to our storage must eventually be deleted. So we have ensured that there is certain death for our added reources.
 
 ![Loop Path of an Object](https://raw.githubusercontent.com/tinganho/balanced-storage/master/LoopPath%402x.png)
-
-In the first loop it can enter a branch, which an element gets added. In the second loop or any subsequent loops it can enter a branch where it gets deleted. It can also enter a branch or two branches where an elements gets created and destroyed at the same loop.
-
-So for loops, whether it is a while loop or a for loop that can loop at least more than once. The following rules applies:
-
-<pre>
-If in a loop, and the loop only loops once:
-<i>&emsp;&emsp;Balance can be reached if in one branch has an add method call and a sub method call.</i>
-<i>&emsp;&emsp;Balance can be reached, if one branch has an add method call and another branch has a sub method call, only if the add method and sub method branch is both being entered and the add method branch is entered before the sub method branch. </i>
-
-If in a loop, and the loop loops twice or more:
-<i>&emsp;&emsp;Balance can be reached if in one branch has an add method call and a sub method call.</i>
-<i>&emsp;&emsp;Balance can be reached if in one branch has an add method and another branch has a sub method.</i>
-</pre>
 
 Here is the whole application source code:
 
