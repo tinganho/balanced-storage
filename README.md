@@ -19,7 +19,6 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Multiple Referenced Objects](#multiple-referenced-objects)
   * [Simultaneous Addition And Subtraction of Objects](#simultaneous-addition-and-subtraction-of-objects)
   * [Initialization and Deallocation](#initialization-and-deallocation)
-  * [Control Flow Analysis](#control-flow-analysis)
   * [Annotation](#annotation)
     * [Add-Sub Method Definition](#add-sub-method-definition)
     * [Syntax](#syntax)
@@ -498,7 +497,9 @@ int main ()
 
 ```
 
-Notice, for a while loop. In order for it to reach balance, it must loop infinity amount of times. And it needs to contain at least one branch for an add method call and one branch for a sub method call.
+Notice, for a while loop. In order for it to reach balance, it must loop infinity amount of times. And it needs to contain at least one branch for an add method call and one branch for a sub method call. Any branches that contains a break statement needs to delete all objects in the storage. All other branches can only continue looping.
+
+(Our break branch above does not delete all objects in the storage. Though breaking the while-loop will eventually exit the application and therefore delete all objects.)
 
 ## Initialization and Deallocation of Objects
 
@@ -798,10 +799,6 @@ for (let i = 0; i < 9; i++) {// Loop only 9 elements and not 10 causes another m
 ```
 
 This is because it is very difficult to do that kind of assertion. A compiler cannot know the business logic of your application and thus cannot make that assertion. Notice, that adding multiple objects simultaneously and at least having a method of subtracting them, even though the the subtraction methods only subtracts one from the storage. It still satisfy our balance definition. Any objects added can eventually be subtracted.
-
-## Control Flow Analysis
-
-A control flow anlysis needs to be done by a compiler to check against that a add method is being called before a corresponding sub method. It would probably break or cause a leakage if a sub method is called before its corresponding add method.
 
 ## Annotation
 
