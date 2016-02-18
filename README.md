@@ -16,6 +16,7 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Loop Paths](#loop-paths)
   * [Auto Aliasing](#auto-aliasing)
   * [Aliasing](#aliasing)
+  * [Multiple References To The Same Object](#multiple-references-to-the-same-object)
   * [Multiple Simultaneous Addition And Subtraction of Objects](#multiple )
   * [Initialization and Deallaction](#initialization-and-deallocation)
   * [Control Flow Analysis](#control-flow-analysis)
@@ -703,8 +704,8 @@ this.anotherView.removeUser(); // Sub method.
 ```
 
 Auto-aliasing helps make code less bloat. Also a programming language designer can skip having any aliasing at all and only have everything auto aliasing.
-
-### Multiple Simultaneous Addition And Subtraction of Objects
+## Multiple 
+## Multiple Simultaneous Addition And Subtraction of Objects
 
 When dealing with multiple simultaneous addition or subtraction of objects, it is good practice to have already balanced method calls on constructors or methods.
 
