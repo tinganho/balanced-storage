@@ -584,11 +584,11 @@ int main ()
 }
 ```
 
-If you have two reference to two separate store you would not have balance, if you called the add method on one, and the delete method on the other.
+Notice, if you have two reference to two separate store, you would not have balance if you called the add method on one, and the delete method on the other.
 
 ## Multiple Referenced Objects
 
-Svereal stores can also add the same objects, as long as balance is made.
+Sveral stores can also add the same objects, as long as balance is made.
 
 ```c++
 Storage* storage1 = new Storage();
@@ -605,7 +605,7 @@ int main ()
 }
 ```
 
-Notice that, each `addItem` call needs to match with `deleteItem` on each store.
+Notice that, each `addItem` call needs to match with a `deleteItem` call on each store.
 
 ## Aliasing
 
