@@ -965,48 +965,7 @@ We can statically confirm that this method subtracts 0 or 1 elements from our st
 ```ts
 this.eventCallbacks[event].splice(i, 1);
 ```
-Please also notice that the add methods adds 1 element and the sub method subtracts 0 or 1 element for each call. So logically there still could be a potential memory leak. Though, our method above has a for loop that loops through all elements and a check for an element existens before a subtraction of element occur. This is crucial for balancing our storage:
-
-```ts
-for (let i = 0; i < callback.length; i++) {
-    if (this.eventCallbacks[event][i] === callback) {
-        this.eventCallbacks[event].splice(i, 1);
-    }
-}
-```
-
-So, in order to have a balance, we must know that whatever was passed on our add method. Would be passed in our sub method. In that way we will know for sure that whatever was added will eventually get deleted. Lets examine our `View` once again. 
-
-```ts
-class View {
-    private description = 'This is the view of: ';
-
-    // add UserChangeTitleCallback
-    constructor(private user: User) {
-        this.user.register('change:title', this.showAlert);
-    }
-
-    // sub UserChangeTitleCallback
-    public removeUser() {
-        this.user.unregister('change:title', this.showAlert);
-    }
-
-    public showAlert(title: string) {
-        alert(this.description + title);
-    }
-}
-```
-
-We can see that whatever was passed in our add method:
-
-```ts
-this.user.register('change:title', this.showAlert);
-```
-The same arguments was passed to our sub method:
-```ts
-this.user.unregister('change:title', this.showAlert);
-```
-So we got a balance. Now, our add and sub method annotated the containg methods in the `View` class. So who ever consumes the `View` class must balance the method calls in order to not cause a memory leak. And our compiler will always check that this is the case.
+Please also notice that our add method adds 1 element and our sub method subtracts 0 or 1 element for each call. Though, it still correctly satisfies our balance definition, because one addition of one element has the potential of being subtracted.
 
 ### False Add-Sub Method example
 
