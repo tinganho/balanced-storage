@@ -318,7 +318,7 @@ onDestroy(callback: () => void) {
 }
 ```
 
-We cannot guarantee that the callback is being called. It is upto the end-user to click the delete button. Though we can guarantee that a call path has a path that at the end calls a method that either adds or subtracts an element in a balanced storage.
+We cannot guarantee that the callback is being called. It is upto the end-user to click the delete button. Though we can guarantee that a call path has a path that at the end calls a method that subtracts an element in a balanced storage.
 
 ## Loop Paths
 
