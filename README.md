@@ -193,7 +193,15 @@ To achieve balance either a scope needs to be balanced or a class's methods neee
 Target | Elements | Balance
 --- | --- | ---
 Class | Methods | For every add method declaration there must exist a corresponding sub method declaration.
-Scope | Call expressions | There is a possibility that a sub method being called to match a corresponding add method call.
+Scope | Call expressions | Given infinite amount of time, one added resource eventually get subtracted.
+
+### Balance Scope Definition
+
+A balance scope is defined as:
+
+```
+Balance is reached whenever given infinite amount of time one added resource eventually get subtracted.
+```
 
 ## Inheritance
 
@@ -827,23 +835,6 @@ This is because it is very difficult to do that kind of assertion. A compiler ca
 
 A control flow anlysis needs to be done by a compiler to check against that a add method is being called before a corresponding sub method. It would probably break or cause a leakage if a sub method is called before its corresponding add method.
 
-## Balance 
-
-If you got one application and the application presents you with two choices you need to make:
-
-1. Add an element.
-2. Delete an element.
-
-If the application only has these two choices. Then we can be certain that whateever gets added will be deleted. And the compiler can be very strict and check that what ever gets added will eventually get deleted. And we call cases such as this for *strong balance*.
-
-Though let say that you now got three choices to make.
-
-1. Add an element.
-2. Delete an element.
-3. Show all elements.
-
-
-
 ## Annotation
 
 One could ask why not annotating the source of the memory leak directly instead of classifying the methods? It's possible and it is even more safer. Lets revisit our `EventEmitter` class:
@@ -854,26 +845,18 @@ export class EventEmitter {
 }
 ```
 
-Our general concept so far, is that for every method for addition of objects, there should exists at least one matching method for subtraction of objects. We can safely say that new assignements will increase the elements count. But also, in the event emitter case, array element additions. With static code analysis we can also make sure that elements are added or subtracted. Before it was upto the developer to manually annotate and implement the method. But nothing stops the developer to implement a method with a sub method which increases the element count.
+Our general concept so far, is that for every method for addition of objects, there should exists at least one matching method for subtraction of objects. We can safely say that new assignements will increase the elements count. But also, in the event emitter case, array element additions. With static code analysis we can also make sure that elements are added or subtracted. Before it was upto the developer to manually annotate and implement the method. But nothing stops the developer to implement a sub method which increases the element count.
 
 ### Add-Sub Method Definition
 
 For the add-sub methods the following holds true:
 
 ```
-Add methods: Adds (1) elements to the storage.
-Sub methods: Subtracts (1) elements to the storage.
+Add methods: Adds elements to the storage.
+Sub methods: Subtracts elements to the storage.
 ```
 
 And let it be our definitions for our add-sub methods for our case.
-
-### Balance Scope Definition
-
-We also need a definition for what a balance scope is.
-
-```
-Balance is reached whenever there is a possibility that one or more sub methods being called for one corresponding add method.
-```
 
 ### Syntax
 
