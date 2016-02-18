@@ -138,7 +138,7 @@ Lets just the add a temporary classification syntax for our methods:
 &emsp;&emsp;<b>add</b> | <b>sub</b> <i>Name MethodDeclaration</i>
 </pre>
 
-The `add` and `sub` keywords are operators that classify methods with a name that identifies that elements are being added or subtracted from our storage, when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and classify our methods.
+The `add` and `sub` keywords are operators that classify methods with a name that identifies that elements are being added or subtracted from our storage when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and classify our methods.
 
 ```ts
 export class User extends EventEmitter {
@@ -166,7 +166,7 @@ class View {
 }
 ```
 
-Though, in this case having the method calls on the same scope is not quite useful. Since we unregister the event directly. It would be as good as not calling anything at all. But in order to pass the compiler checks we can also call a sub method in another method.
+Though, in this case having the method calls on the same scope is not quite useful. Since we unregister the event directly. It would be as good as not calling anything at all. But in order to pass the compiler checks we can also call a sub method in another declared method of the class.
 
 ```ts
 class View {
