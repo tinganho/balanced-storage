@@ -946,4 +946,4 @@ And we want to statically annotate that any consumer of this node needs to call 
 
 # Conclusion
 
-We have showed that using balancing of add and sub methods can provide a powerful way of checking applications are not leaking memory. Though it remains to be implemented and tested on a real programming language.
+We have showed that using balancing of add and sub methods can provide a powerful way of checking applications to prevent memory leaks. Though it remains to be implemented and tested on a real programming language.
