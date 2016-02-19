@@ -189,7 +189,7 @@ In the above example. We call `this.user.unregister('change:title', this.showAle
 
 To achieve balance either a scope needs to be balanced or a class's methods need to be balanced. A balanced scope, means that given infinite amount of time, there is a certainty that a sub method being called to match a corresponding add method call. A balanced class, means that there exists a corresponding sub method declaration for an add method declaration.
 
-Target | Elements | Balance
+Location | Targets | Balance
 --- | --- | ---
 Class | Methods | For every add method declaration there must exist a corresponding sub method declaration.
 Scope | Call expressions | Given infinite amount of time, one added resource will eventually get subtracted.
