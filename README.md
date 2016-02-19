@@ -130,7 +130,7 @@ The property `eventCallbacks` above is hashmap of a list of callbacks for each e
 
 ## Method Classification
 
-Lets just the add a temporary classification syntax for our methods:
+Lets just the add a temporary classification syntax for our methods(we will later present that this classification syntax is not needed):
 
 <pre>
 <i>MethodClassification ::</i>
