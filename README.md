@@ -507,7 +507,7 @@ In C++ we initialize with `new` and deallocate objects with `delete`. Our balanc
 
 `new` in C++ will be considered as an add method. `delete` will be considered as a sub method.
 
-First example is the most simpliest one:
+First example is the most simplest one:
 
 ```c++
 int main ()
