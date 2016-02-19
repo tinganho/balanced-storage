@@ -849,7 +849,6 @@ Lets annotate our `eventCallbacks` store:
 
 ```ts
 export class User extends EventEmitter {
-
     balance EventCallbacks[event] as EventCallback
     public eventCallbacks: EventCallbacks = {}
 }
