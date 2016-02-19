@@ -501,7 +501,7 @@ int main ()
 
 Notice, for a loop statement. In order for it to reach balance, i.e. whatever gets added will eventually gets deleted, it must loop infinite amount of times(a while loop). And it needs to contain at least one branch for an add method call and one branch for a sub method call. Any branches that contains a break statement needs to delete all objects in the storage. All other branches must continue looping after their execution.
 
-(Our break branch above does not delete all objects in the storage. Though breaking the while-loop will eventually exit the application and therefore delete all objects.)
+(Our break branch above does not delete all objects in the storage. Though breaking the while-loop will eventually exit the application and therefore delete/deallocate all objects.)
 
 ## Initialization and Deallocation of Objects
 
