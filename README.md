@@ -94,7 +94,7 @@ As the comment says, `this` inside the closure is referencing  the view. So `thi
 
 We want to prevent memory leaks by static code analysis. But in doing so, we must analyse the source of memory leaks. By definition a memory leak is an unused resource at runtime. We allocate memory and initialize our resource. When the resource is no longer needed we need to deallocate it. In a garbage collected language we can unreference objects so they get garbage collected. And for a manual managed memory programming languages, we must deallocate it manually by writing some sort of expressions. In a majority of cases, if not all, a memory leaked resource often has one or more references to itself. In a garbage collected language this always holds true, they always have at least one reference to itself(otherwise they would be garbage collected). 
 
-Let us just annotate these methods that uses these references. I have not shown you the `EventEmitter` class yet and lets begin by examine it:
+Let us just annotate these methods that uses these references. I have not shown you the `EventEmitter` class yet. Lets begin by examine it:
 
 ```ts
 export class EventEmitter {
