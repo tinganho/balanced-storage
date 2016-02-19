@@ -226,7 +226,7 @@ Now, let use the above class in an another class we call `SubView`:
 class SubView {
     private view: View;
     
-    public show() {
+    public showAndRemoveView() {
         this.view = new View(this.user); // Add method(constructor).
         this.view = null;
     }
@@ -241,7 +241,7 @@ We can add the call expression `this.view.removeUser()` below, to match our add 
 class SubView {
     private view: View;
     
-    public show() {
+    public showAndRemoveView() {
         this.view = new View(this.user); // Add method(constructor).
         this.view.removeUser(); // Sub method.
         this.view = null;
@@ -256,14 +256,14 @@ class SubView {
     private view: View;
     
 	// add UserChangeTitleCallback
-    public show() {
+    public showAndRemoveView() {
         this.view = new View(this.user); // Add method.
         this.view = null;
     }
 }
 ```
 
-The method `show` inherited the `add` classification from the expression `new View(this.user)`. This inheritance loop goes on and on.
+The method `show` inherited the `add` classification from the expression `new View(this.user)`.
 
 ## Call Paths
 
