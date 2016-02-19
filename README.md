@@ -698,7 +698,7 @@ this.anotherView = new View(this.user); // Add method.
 ```
 And look at the assign target `this.anotherView` to match a corresponding sub method call.
 
-Because we assign to `this.anotherView`, any kind of submethod classification must call a submethod on `this.anotherView`. And that is exactly what we have done in our example:
+Because we assigned to `this.anotherView`, any kind of sub method classification must call a sub method on `this.anotherView`. And that is exactly what we have done in our example:
 
 ```ts
 this.anotherView.removeUser(); // Sub method.
