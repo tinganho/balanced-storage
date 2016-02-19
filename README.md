@@ -704,7 +704,7 @@ Because we assigned to `this.anotherView`, any kind of sub method classification
 this.anotherView.removeUser(); // Sub method.
 ```
 
-Auto-aliasing helps make code less bloat. Also a programming language designer can skip having any aliasing at all and only have everything auto aliasing.
+Auto-aliasing helps make code less bloated. Also a programming language designer can skip having any aliasing at all and only have everything auto aliasing.
 
 ## Multiple Simultaneous Addition And Subtraction of Objects
 
