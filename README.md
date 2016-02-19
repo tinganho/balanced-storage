@@ -917,7 +917,7 @@ Please also notice that our add method adds 1 element and our sub method subtrac
 
 ### False Add-Sub Method example
 
-Lets also examine an false add-sub method example. Lets take our `emit` method as an example:
+Lets also examine a false add-sub method example. Lets take our `emit` method as an example:
 
 ```ts
 public emit(event: string, args: any[]) {
@@ -929,7 +929,7 @@ public emit(event: string, args: any[]) {
 }
 ```
 
-There is no expression in above that increases our elements count in our store. There exists index look up such as `this.eventCallbackStore[event]`, though they don't add any elements. So we can safely say that this method does not satisfy any of our add-sub method definitions above.
+There is no expression in above that increases our elements count in our store. There exists an index look up such as `this.eventCallbackStore[event]`, though it does not add any elements. So we can safely say that this method does not satisfy any of our add-sub method definitions above.
 
 ### Types of storage
 
