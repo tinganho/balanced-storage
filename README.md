@@ -913,7 +913,7 @@ We can statically confirm that this method subtracts 0 or 1 elements from our st
 ```ts
 this.eventCallbacks[event].splice(i, 1);
 ```
-Please also notice that our add method adds 1 element and our sub method subtracts 0 or 1 element for each call. It still correctly satisfies our balance definition, because an addition of an element has the potential of being subtracted given infinite amount of time.
+Please also notice that our add method adds 1 element and our sub method subtracts 0 or 1 element for each call. It still correctly satisfies our balance definition, because an addition of an element has the potential of being subtracted, given infinite amount of time.
 
 ### False Add-Sub Method example
 
