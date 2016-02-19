@@ -398,7 +398,7 @@ The compiler will not compile the above code. Since we have not used the sub met
     }
 ```
 
-Now, if we consider our while loop, looping infinite of time. Given infinite amount of time, we can derive that what eventually gets added to our storage must eventually be deleted. So we have ensured that there is certain death for our added reources.
+Now, if we consider our while loop, looping infinite of time. Given infinite amount of time, we can derive that what eventually gets added to our storage must eventually be deleted. This is derived by *Murphys Law*, whatever can happen, will happen. So we have ensured that there is certain death for our added reources.
 
 ![Loop Path of an Object](https://raw.githubusercontent.com/tinganho/balanced-storage/master/LoopPath%402x.png)
 
