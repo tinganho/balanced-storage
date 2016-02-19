@@ -335,7 +335,7 @@ class Storage {
 public:
     vector<Item*> items;
     
-    Storage(): items { new Item { "eyeglasses" } } {}
+    Storage() {}
     
     void addItem(string name) {
         items.push_back(new Item {name});
