@@ -801,7 +801,7 @@ for (let i = 0; i < 9; i++) {// Loop only 9 elements and not 10 causes another m
 }
 ```
 
-Notice, that adding multiple objects simultaneously and at least having a method of subtracting them, even though the the subtraction methods only subtracts one from the storage. It still satisfy our balance definition. Any objects added can eventually be subtracted.
+Notice, that adding multiple objects simultaneously and at least having a method of subtracting them, even though the the subtraction method only subtracts one from the storage. It still satisfy our balance definition. Any objects added can eventually be subtracted.
 
 ## Annotation
 
