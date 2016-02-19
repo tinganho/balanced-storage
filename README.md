@@ -70,6 +70,8 @@ Then in some other class's method we instantiate the view with a referenced user
 
 ```ts
 class SubView {
+    constructor(private user: User) {}
+    
     public showAndRemoveView() {
         this.view = new View(this.user);
         this.view = null; // this.user persists.
