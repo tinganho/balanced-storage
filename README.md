@@ -839,7 +839,7 @@ We also want to introduce a new syntax to annotate a storage:
 &emsp;&emsp;<i>"[", Key ,"]"</i>
 </pre>
 
-*StorageDeclaration* is a property declaration in a class. *ElementName* is the name of an element in *StorageDeclaration*. The *Key* above is an arbitrary identifier. It does not need to match anything. It is just there for readability. Though the whole index expression indicates it should go one or more levels deeper to indicate an element addition or subtraction is made when the compiler do static analysis of the add methods and sub methods. More on this later.
+*StorageDeclaration* is a property declaration in a class. *ElementName* is the name of an element in *StorageDeclaration*. The *Key* above is an arbitrary identifier. It does not need to match anything. It is just there for readability. Though the whole index expression indicates it should go one or more levels deeper to indicate an element addition or subtraction. More on this later.
 
 Lets annotate our `eventCallbacks` store:
 
