@@ -687,7 +687,7 @@ So in other words, The above code will compile. It also causes no memory leaks.
 
 ## Auto Aliasing
 
-One could also resolve the name collisioning simple by looking at the assign target.
+One could also resolve the name collisioning simple by looking at the left operand.
 
 For our add method we got the following code:
 ```ts
@@ -698,7 +698,7 @@ We could just have written:
 ```ts
 this.anotherView = new View(this.user); // Add method.
 ```
-And look at the assign target `this.anotherView` to match a corresponding sub method call.
+And look at the left operand `this.anotherView` to match a corresponding sub method call.
 
 Because we assigned to `this.anotherView`, any kind of sub method classification must call a sub method on `this.anotherView`. And that is exactly what we have done in our example:
 
