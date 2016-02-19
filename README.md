@@ -547,7 +547,7 @@ We have an initialization expression on our add method:
 items.push_back(new Item {name});
 ```
 
-Because it is references an index in `items` by `push_back`, our sub method also need to reference an index in `items` in order to reach balance. And that is exactly what we do:
+Because it is references an index in `items` by `push_back`, our sub method also need to reference an index in `items` in order to reach a balance. And that is exactly what we do:
 
 ```c++
 void deleteItem(int index) {
