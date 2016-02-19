@@ -265,7 +265,7 @@ The method `show` inherited the `add` classification from the expression `new Vi
 
 ## Call Paths
 
-We have so far only considered object having an instant death. And this is not so useful. What about objects living longer than an instant? We want to keep the goal whenever an object has a certian death (given infinite amont of time) the compiler checks will pass. Now, this leads us to our next rule:
+We have so far only considered object having an instant death. And this is not so useful. What about objects living longer than an instant? We want to keep the goal whenever an object has a certian death (given infinite amount of time) the compiler check will pass. Now, this leads us to our next rule:
 
 ```
 Passing a sub method as an argument to a call expression will balance an add method in current scope.
