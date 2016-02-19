@@ -137,7 +137,7 @@ Lets just the add a temporary classification syntax for our methods(we will late
 &emsp;&emsp;<b>add</b> | <b>sub</b> <i>Name MethodDeclaration</i>
 </pre>
 
-The `add` and `sub` keywords are operators that classify methods with a name that identifies that elements are being added or subtracted from our storage when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we go ahead and classify our methods.
+The `add` and `sub` keywords are operators that classify methods with a name that identifies that elements are being added or subtracted from our storage when the method is called. So for our `User` model which is an extension of the `EventEmitter` class, we can go ahead and classify our methods:
 
 ```ts
 export class User extends EventEmitter {
