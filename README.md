@@ -194,7 +194,7 @@ Scope | Call expressions | Given infinite amount of time, one added resource eve
 
 ## Inheritance
 
-Notice first, that whenever there is a scope with an unmatched add or sub methods. The unmatched methods classifies the containing method. Here we show the inherited classification in the comments below:
+Notice first, that whenever there is a scope with an unmatched add or sub methods. The unmatched methods classifies the containing method. Here we show the inherited classifications in the comments below:
 
 ```ts
 class View {
