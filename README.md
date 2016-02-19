@@ -192,7 +192,7 @@ To achieve balance either a scope needs to be balanced or a class's methods need
 Target | Elements | Balance
 --- | --- | ---
 Class | Methods | For every add method declaration there must exist a corresponding sub method declaration.
-Scope | Call expressions | Given infinite amount of time, one added resource eventually get subtracted.
+Scope | Call expressions | Given infinite amount of time, one added resource will eventually get subtracted.
 
 ## Inheritance
 
