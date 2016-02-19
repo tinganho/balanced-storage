@@ -651,6 +651,7 @@ class SubView {
         this.view.removeUser(); // Sub method.
         this.view = null;
 	}
+	
 	// off UserChangeTitleCallbackOnAnotherView
 	public removeAnotherView() {
 		off UserChangeTitleCallback as UserChangeTitleCallbackOnAnotherView
