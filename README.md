@@ -820,8 +820,10 @@ Our general concept so far, is that for every method for addition of objects, th
 For the add-sub methods the following holds true:
 
 ```
-Add methods: Adds elements to the storage.
-Sub methods: Subtracts elements to the storage.
+Add methods: Adds 0 or more elements to the storage.
+Sub methods: Subtracts 0 or more elements to the storage.
+
+Notice: The range is crucial, only 0 will not satisfy any of the definitions.
 ```
 
 And let it be our definitions for our add-sub methods for our case.
