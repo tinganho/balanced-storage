@@ -933,7 +933,7 @@ There is no expression in above that increases our elements count in our store. 
 
 ### Types of storage
 
-We only considered a hash map so far. Though any type that can grow the heap can be annotated.
+We only considered arrays so far. Though any type that can grow the heap can be annotated.
 
 ## Heap Object Graph
 
