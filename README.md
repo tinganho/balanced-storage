@@ -503,7 +503,7 @@ Notice, for a loop statement. In order for it to reach balance, i.e. whatever ge
 
 (Our break branch above does not delete all objects in the storage. Though breaking the while-loop will eventually exit the application and therefore delete/deallocate all objects.)
 
-## Initialization and Deallocation of Objects
+## Initialization and Deallocation
 
 In C++ we initialize with `new` and deallocate objects with `delete`. Our balanced storage definition so far have only considered collections as data types. The question is, if we can apply the same balancing rules too prevent memory leaks? And it turns out that we can.
 
