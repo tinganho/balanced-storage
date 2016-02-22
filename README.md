@@ -17,8 +17,8 @@ Software has been daunted with memory leaks for a long time. There exists one in
   * [Auto Aliasing](#auto-aliasing)
   * [Aliasing](#aliasing)
   * [Multiple Referenced Objects](#multiple-referenced-objects)
-  * [Simultaneous Addition And Subtraction of Objects](#simultaneous-addition-and-subtraction-of-objects)
-  * [Initialization and Deallocation](#initialization-and-deallocation)
+  * [Multiple Simultaneous Addition And Subtraction of Objects](#multiple-simultaneous-addition-and-subtraction-of-objects)
+  * [Initialization and Deallocation of Objects](#initialization-and-deallocation-of-objects)
   * [Annotation](#annotation)
     * [Add-Sub Method Definition](#add-sub-method-definition)
     * [Syntax](#syntax)
@@ -503,7 +503,7 @@ Notice, for a loop statement. In order for it to reach balance, i.e. whatever ge
 
 (Our break branch above does not delete all objects in the storage. Though breaking the while-loop will eventually exit the application and therefore delete/deallocate all objects.)
 
-## Initialization and Deallocation
+## Initialization and Deallocation of Objects
 
 In C++ we initialize with `new` and deallocate objects with `delete`. Our balanced storage definition so far have only considered collections as data types. The question is, if we can apply the same balancing rules too prevent memory leaks? And it turns out that we can.
 
